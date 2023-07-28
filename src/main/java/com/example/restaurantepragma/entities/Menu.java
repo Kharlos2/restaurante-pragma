@@ -15,7 +15,7 @@ public class Menu {
     @Column(name = "menu_id")
     private Long id;
     @Column(nullable = false)
-    private Character role;
+    private Integer role;
     @Column(name = "name_menu", nullable = false)
     private String nameMenu;
     @Column(nullable = false)
@@ -26,7 +26,6 @@ public class Menu {
     private String url;
     @Column(nullable = false)
     private String category;
-    @Column(nullable = false)
     private Boolean state;
     @Column(nullable = false)
     private String campus;
@@ -40,7 +39,7 @@ public class Menu {
     public Menu() {
     }
 
-    public Menu(Long id, Character role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String campus, Double preparationTime) {
+    public Menu(Long id, Integer role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String campus, Double preparationTime) {
         this.id = id;
         this.role = role;
         this.nameMenu = nameMenu;
@@ -61,11 +60,11 @@ public class Menu {
         this.id = id;
     }
 
-    public Character getRole() {
+    public Integer getRole() {
         return role;
     }
 
-    public void setRole(Character role) {
+    public void setRole(Integer role) {
         this.role = role;
     }
 

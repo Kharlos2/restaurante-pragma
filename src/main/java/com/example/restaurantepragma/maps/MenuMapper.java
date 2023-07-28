@@ -1,6 +1,7 @@
 package com.example.restaurantepragma.maps;
 
 
+import com.example.restaurantepragma.dto.Menu.MenuStateDTO;
 import com.example.restaurantepragma.dto.Menu.ResponseMenuDTO;
 import com.example.restaurantepragma.entities.Menu;
 import org.mapstruct.Mapper;
@@ -20,5 +21,8 @@ public interface MenuMapper {
     })
     ResponseMenuDTO toMenuDTO(Menu menu);
     List<ResponseMenuDTO> toMenusDTO(List<Menu> menus);
+
+    MenuStateDTO toMenuState(Menu menu);
+
 
 }

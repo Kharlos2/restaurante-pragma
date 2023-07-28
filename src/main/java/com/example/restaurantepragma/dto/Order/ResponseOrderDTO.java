@@ -1,7 +1,5 @@
 package com.example.restaurantepragma.dto.Order;
 
-
-
 public class ResponseOrderDTO extends OrderDTO{
     private Character rol;
     private String sede;

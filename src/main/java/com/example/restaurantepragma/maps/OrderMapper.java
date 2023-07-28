@@ -2,6 +2,7 @@ package com.example.restaurantepragma.maps;
 
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
 import com.example.restaurantepragma.entities.Order;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -18,4 +19,7 @@ public interface OrderMapper {
     ResponseOrderDTO toOrderDTO(Order order);
     List<ResponseOrderDTO> toOrdersDTO(List<Order> orders);
 
+    @InheritInverseConfiguration
+    @Mapping(target = "id", ignore = true)
+    Order toOrder (ResponseOrderDTO responseOrderDTO);
 }

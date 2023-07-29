@@ -1,6 +1,8 @@
 package com.example.restaurantepragma.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -17,10 +19,15 @@ public class OrderMenu {
     private Order orderId;
     @ManyToOne
     @JoinColumn
-    @JsonBackReference
+    @JsonManagedReference
     private Menu menuId;
-
     public OrderMenu() {
+    }
+
+    public OrderMenu(Integer quantity, Order orderId, Menu menuId) {
+        this.quantity = quantity;
+        this.orderId = orderId;
+        this.menuId = menuId;
     }
 
     public Long getId() {

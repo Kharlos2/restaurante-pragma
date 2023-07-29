@@ -39,6 +39,8 @@ public class MenuService {
                 throw new Exception(MenuResponses.INCORRECT_CATEGORY.getMessage());
             } else if (MenuValidations.validationCampus(menu.getCampus())) {
                 throw new Exception(MenuResponses.INCORRECT_VENUE.getMessage());
+            } else if (menuRepository.existsByNameMenu(menu.getNameMenu())) {
+                throw new Exception(MenuResponses.EXISTING_PLATE.getMessage());
             }
             menu.setState(true);
             return menuMapper.toMenuDTO(menuRepository.save(menu));

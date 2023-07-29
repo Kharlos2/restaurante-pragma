@@ -1,5 +1,6 @@
 package com.example.restaurantepragma.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -32,7 +33,7 @@ public class Menu {
     @Column(name = "preparation_time", nullable = false)
     private Double preparationTime;
     @OneToMany(mappedBy = "menuId")
-    @JsonManagedReference
+    @JsonBackReference
     @JsonIgnore
     private List<OrderMenu> orderMenus;
 
@@ -130,5 +131,13 @@ public class Menu {
 
     public void setPreparationTime(Double preparationTime) {
         this.preparationTime = preparationTime;
+    }
+
+    public List<OrderMenu> getOrderMenus() {
+        return orderMenus;
+    }
+
+    public void setOrderMenus(List<OrderMenu> orderMenus) {
+        this.orderMenus = orderMenus;
     }
 }

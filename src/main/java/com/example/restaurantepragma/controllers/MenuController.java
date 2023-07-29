@@ -39,7 +39,7 @@ public class MenuController {
         try{
             Page<ResponseMenuDTO> platesPages = menuService.findPlatesForCategotyAndCampus(category,campus,numberRegister);
             List<ResponseMenuDTO> plateList = platesPages.getContent();
-            return ResponseEntity.ok(new ArrayList<>(menuService.findAll()));
+            return ResponseEntity.ok(new ArrayList<>(plateList));
         }catch (Exception e){
             List<MenuDTO> menusDTO = new ArrayList<>();
             menusDTO.add(new MenuErrorDTO(e.getMessage()));

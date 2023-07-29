@@ -1,5 +1,6 @@
 package com.example.restaurantepragma.entities;
 
+import com.example.restaurantepragma.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -14,9 +15,10 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long id;
-    private Character rol;
+    private Integer role;
+    private Integer acceptanceRole;
     private String sede;
-    private Boolean state;
+    private String stateRequested = "EARNING";
     @OneToMany(mappedBy = "orderId")
     @JsonManagedReference
     @JsonIgnore
@@ -25,11 +27,12 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long id, Character rol, String sede, Boolean state, List<OrderMenu> orderMenus) {
+    public Order(Long id, Integer role, Integer acceptanceRole, String sede, String stateRequested, List<OrderMenu> orderMenus) {
         this.id = id;
-        this.rol = rol;
+        this.role = role;
+        this.acceptanceRole = acceptanceRole;
         this.sede = sede;
-        this.state = state;
+        this.stateRequested = stateRequested;
         this.orderMenus = orderMenus;
     }
 
@@ -41,12 +44,20 @@ public class Order {
         this.id = id;
     }
 
-    public Character getRol() {
-        return rol;
+    public Integer getRole() {
+        return role;
     }
 
-    public void setRol(Character rol) {
-        this.rol = rol;
+    public void setRole(Integer role) {
+        this.role = role;
+    }
+
+    public Integer getAcceptanceRole() {
+        return acceptanceRole;
+    }
+
+    public void setAcceptanceRole(Integer acceptanceRole) {
+        this.acceptanceRole = acceptanceRole;
     }
 
     public String getSede() {
@@ -57,12 +68,12 @@ public class Order {
         this.sede = sede;
     }
 
-    public Boolean getState() {
-        return state;
+    public String getStateRequested() {
+        return stateRequested;
     }
 
-    public void setState(Boolean state) {
-        this.state = state;
+    public void setStateRequested(String stateRequested) {
+        this.stateRequested = stateRequested;
     }
 
     public List<OrderMenu> getOrderMenus() {

@@ -20,9 +20,11 @@ public interface MenuMapper {
             @Mapping(source = "campus", target = "sede")
     })
     ResponseMenuDTO toMenuDTO(Menu menu);
+
     List<ResponseMenuDTO> toMenusDTO(List<Menu> menus);
 
     MenuStateDTO toMenuState(Menu menu);
+
 
 
 }

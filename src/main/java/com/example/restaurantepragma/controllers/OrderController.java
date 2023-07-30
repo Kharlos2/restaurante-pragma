@@ -1,6 +1,7 @@
 package com.example.restaurantepragma.controllers;
 
 import com.example.restaurantepragma.dto.Order.OrderDTO;
+import com.example.restaurantepragma.dto.Order.OrderErrorDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
 package com.example.restaurantepragma.entities;
 
-import com.example.restaurantepragma.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -17,7 +16,7 @@ public class Order {
     private Long id;
     private Integer role;
     private Integer acceptanceRole;
-    private String sede;
+    private String franchise;
     private String stateRequested = "EARNING";
     @OneToMany(mappedBy = "orderId")
     @JsonManagedReference
@@ -27,11 +26,11 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long id, Integer role, Integer acceptanceRole, String sede, String stateRequested, List<OrderMenu> orderMenus) {
+    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, String stateRequested, List<OrderMenu> orderMenus) {
         this.id = id;
         this.role = role;
         this.acceptanceRole = acceptanceRole;
-        this.sede = sede;
+        this.franchise = franchise;
         this.stateRequested = stateRequested;
         this.orderMenus = orderMenus;
     }
@@ -60,12 +59,12 @@ public class Order {
         this.acceptanceRole = acceptanceRole;
     }
 
-    public String getSede() {
-        return sede;
+    public String getFranchise() {
+        return franchise;
     }
 
-    public void setSede(String sede) {
-        this.sede = sede;
+    public void setFranchise(String franchise) {
+        this.franchise = franchise;
     }
 
     public String getStateRequested() {

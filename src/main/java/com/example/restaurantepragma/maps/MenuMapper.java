@@ -17,7 +17,7 @@ public interface MenuMapper {
             @Mapping(source = "price", target = "precio"),
             @Mapping(source = "url", target = "foto"),
             @Mapping(source = "description", target = "descripcion"),
-            @Mapping(source = "campus", target = "sede")
+            @Mapping(source = "franchise", target = "franchise")
     })
     ResponseMenuDTO toMenuDTO(Menu menu);
 

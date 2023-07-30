@@ -7,7 +7,7 @@ import java.util.List;
 public class OrderRequestDTO extends OrderDTO{
     private Integer role;
     private Integer acceptanceRole;
-    private String sede;
+    private String franchise;
     private List<MenuRequestDTO> orderMenus;
 
     public Integer getRole() {
@@ -26,12 +26,12 @@ public class OrderRequestDTO extends OrderDTO{
         this.acceptanceRole = acceptanceRole;
     }
 
-    public String getSede() {
-        return sede;
+    public String getFranchise() {
+        return franchise;
     }
 
-    public void setSede(String sede) {
-        this.sede = sede;
+    public void setFranchise(String franchise) {
+        this.franchise = franchise;
     }
 
     public List<MenuRequestDTO> getOrderMenus() {

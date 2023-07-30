@@ -3,16 +3,16 @@ package com.example.restaurantepragma.dto.Menu;
 public class MenuUpdateDTO extends MenuDTO{
     private Integer price;
     private String description;
-    private String campus;
+    private String franchise;
 
 
     public MenuUpdateDTO() {
     }
 
-    public MenuUpdateDTO(Integer price, String description, String campus) {
+    public MenuUpdateDTO(Integer price, String description, String franchise) {
         this.price = price;
         this.description = description;
-        this.campus = campus;
+        this.franchise = franchise;
     }
 
     public Integer getPrice() {
@@ -31,12 +31,12 @@ public class MenuUpdateDTO extends MenuDTO{
         this.description = description;
     }
 
-    public String getCampus() {
-        return campus;
+    public String getFranchise() {
+        return franchise;
     }
 
-    public void setCampus(String campus) {
-        this.campus = campus;
+    public void setFranchise(String franchise) {
+        this.franchise = franchise;
     }
 
 }

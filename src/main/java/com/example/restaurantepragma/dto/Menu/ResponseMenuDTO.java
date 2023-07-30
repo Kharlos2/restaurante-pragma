@@ -6,7 +6,7 @@ public class ResponseMenuDTO extends MenuDTO {
     private Integer precio;
     private String foto;
     private String descripcion;
-    private String sede;
+    private String franchise;
 
     public String getNombreMenu() {
         return nombreMenu;
@@ -40,12 +40,12 @@ public class ResponseMenuDTO extends MenuDTO {
         this.descripcion = descripcion;
     }
 
-    public String getSede() {
-        return sede;
+    public String getFranchise() {
+        return franchise;
     }
 
-    public void setSede(String sede) {
-        this.sede = sede;
+    public void setFranchise(String franchise) {
+        this.franchise = franchise;
     }
 
 }

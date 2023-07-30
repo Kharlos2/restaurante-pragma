@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
     @Mappings({
-            @Mapping(source = "sede", target = "sede"),
+            @Mapping(source = "franchise", target = "sede"),
             @Mapping(source = "stateRequested", target = "estadoPededido"),
             @Mapping(source = "orderMenus", target = "detallesOrden")
     })

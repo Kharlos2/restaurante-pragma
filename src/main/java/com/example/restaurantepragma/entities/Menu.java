@@ -29,7 +29,7 @@ public class Menu {
     private String category;
     private Boolean state;
     @Column(nullable = false)
-    private String campus;
+    private String franchise;
     @Column(name = "preparation_time", nullable = false)
     private Double preparationTime;
     @OneToMany(mappedBy = "menuId")
@@ -40,7 +40,7 @@ public class Menu {
     public Menu() {
     }
 
-    public Menu(Long id, Integer role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String campus, Double preparationTime) {
+    public Menu(Long id, Integer role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String franchise, Double preparationTime) {
         this.id = id;
         this.role = role;
         this.nameMenu = nameMenu;
@@ -49,7 +49,7 @@ public class Menu {
         this.url = url;
         this.category = category;
         this.state = state;
-        this.campus = campus;
+        this.franchise = franchise;
         this.preparationTime = preparationTime;
     }
 
@@ -117,12 +117,12 @@ public class Menu {
         this.state = state;
     }
 
-    public String getCampus() {
-        return campus;
+    public String getFranchise() {
+        return franchise;
     }
 
-    public void setCampus(String campus) {
-        this.campus = campus;
+    public void setFranchise(String franchise) {
+        this.franchise = franchise;
     }
 
     public Double getPreparationTime() {

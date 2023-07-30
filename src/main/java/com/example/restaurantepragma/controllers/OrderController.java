@@ -22,7 +22,7 @@ public class OrderController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(orderService.save(order));
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
     @GetMapping("/")

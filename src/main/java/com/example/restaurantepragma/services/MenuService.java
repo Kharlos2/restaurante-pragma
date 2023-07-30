@@ -8,6 +8,7 @@ import com.example.restaurantepragma.entities.Menu;
 import com.example.restaurantepragma.enums.MenuResponses;
 import com.example.restaurantepragma.maps.MenuMapper;
 import com.example.restaurantepragma.repository.MenuRepository;
+import com.example.restaurantepragma.validations.GeneralValidations;
 import com.example.restaurantepragma.validations.MenuValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,10 +36,10 @@ public class MenuService {
                 throw new Exception(MenuResponses.WRONG_PRICE.getMessage());
             }else if (MenuValidations.rightPreparationTime(menu.getPreparationTime())) {
                 throw new Exception(MenuResponses.INCORRECT_PREPARATION_TIME.getMessage());
-            }else if (MenuValidations.validationCategory(menu.getCategory())){
+            }else if (GeneralValidations.validationCategory(menu.getCategory())){
                 throw new Exception(MenuResponses.INCORRECT_CATEGORY.getMessage());
-            } else if (MenuValidations.validationCampus(menu.getCampus())) {
-                throw new Exception(MenuResponses.INCORRECT_VENUE.getMessage());
+            } else if (GeneralValidations.validationCampus(menu.getFranchise())) {
+                throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
             } else if (menuRepository.existsByNameMenu(menu.getNameMenu())) {
                 throw new Exception(MenuResponses.EXISTING_PLATE.getMessage());
             }
@@ -63,15 +64,15 @@ public class MenuService {
                 Menu menuUpdate = search.get();
                 if (MenuValidations.rightPrice(menu.getPrice())){
                     throw new Exception(MenuResponses.WRONG_PRICE.getMessage());
-                } else if (MenuValidations.validationCampus(menu.getCampus())) {
-                    throw new Exception(MenuResponses.INCORRECT_VENUE.getMessage());
+                } else if (GeneralValidations.validationCampus(menu.getFranchise())) {
+                    throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
                 }else if (MenuValidations.incorrectString(menu.getDescription())){
                     throw new Exception(MenuResponses.INCORRECT_DESCRIPTION.getMessage());
                 } else if (MenuValidations.validationUser(user)){
                     throw new Exception(MenuResponses.NO_ADMIN.getMessage());
                 }
                 menuUpdate.setPrice(menu.getPrice());
-                menuUpdate.setCampus(menu.getCampus());
+                menuUpdate.setFranchise(menu.getFranchise());
                 menuUpdate.setDescription(menuUpdate.getDescription());
                 return menuMapper.toMenuDTO(menuRepository.save(menuUpdate));
             }
@@ -96,10 +97,10 @@ public class MenuService {
             throw new Exception(e.getMessage());
         }
     }
-    public Page<ResponseMenuDTO> findPlatesForCategotyAndCampus(String category, String campus, int numberRegister) throws Exception{
+    public Page<ResponseMenuDTO> findPlatesForCategotyAndFranchise(String category, String franchise, int numberRegister) throws Exception{
         try {
             Pageable pageable = PageRequest.of(0,numberRegister);
-            Page<Menu> menuPage = menuRepository.findByCategoryAndCampus(category, campus, pageable);
+            Page<Menu> menuPage = menuRepository.findByCategoryAndFranchise(category, franchise, pageable);
             return menuPage.map(menu -> menuMapper.toMenuDTO(menu));
         }catch (Exception e){
             throw new Exception(e.getMessage());

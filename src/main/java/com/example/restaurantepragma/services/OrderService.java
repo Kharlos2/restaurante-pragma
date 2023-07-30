@@ -12,6 +12,8 @@ import com.example.restaurantepragma.maps.OrderMenuMapper;
 import com.example.restaurantepragma.repository.MenuRepository;
 import com.example.restaurantepragma.repository.OrderMenuRepository;
 import com.example.restaurantepragma.repository.OrderRepository;
+import com.example.restaurantepragma.validations.GeneralValidations;
+import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,18 +37,27 @@ public class OrderService {
 
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
+            if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
             Order orderEntity =  orderRepository.save(orderMapper.toOrder(order));
             List<OrderMenu> orderMenus = new ArrayList<>();
+            List<String> incorrectFranchisePlate = new ArrayList<>();
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
                 if (menuOptional.isPresent()) {
-                    if (menuOptional.get().getState()) orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
+                    if(!order.getFranchise().equals(menuOptional.get().getFranchise())) incorrectFranchisePlate.add(menuOptional.get().getNameMenu());
+                    else if (menuOptional.get().getState()) orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
                     else throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
-            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
-            responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
-            return responseOrderDTO;
+            //Falta mirar bien porque se guarda el pedido aunque salte la excepcion
+            if (incorrectFranchisePlate.isEmpty()){
+                ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
+                responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
+                return responseOrderDTO;
+            }else {
+                System.out.println(incorrectFranchisePlate);
+                throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
+            }
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }

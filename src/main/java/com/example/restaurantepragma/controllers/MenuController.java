@@ -33,11 +33,11 @@ public class MenuController {
     @GetMapping("/")
     public ResponseEntity<List<MenuDTO>> findAll(
             @RequestParam() String category,
-            @RequestParam() String campus,
+            @RequestParam() String franchise,
             @RequestParam() int numberRegister
     ) throws Exception{
         try{
-            Page<ResponseMenuDTO> platesPages = menuService.findPlatesForCategotyAndCampus(category,campus,numberRegister);
+            Page<ResponseMenuDTO> platesPages = menuService.findPlatesForCategotyAndFranchise(category,franchise,numberRegister);
             List<ResponseMenuDTO> plateList = platesPages.getContent();
             return ResponseEntity.ok(new ArrayList<>(plateList));
         }catch (Exception e){

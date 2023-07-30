@@ -6,7 +6,7 @@ public enum MenuResponses {
     WRONG_PRICE("El precio tiene que ser un numero positivo y mayor a 0."),
     INCORRECT_CATEGORY("Debe ingresar una categoria valida"),
     INCORRECT_PREPARATION_TIME("Debe ingresar un tiempo de preparación correcto."),
-    INCORRECT_VENUE("Debe ingresar una sede correcta"),
+    INCORRECT_FRANCHISE("Debe ingresar una sede correcta"),
     PLATE_NOT_FOUND("No se encontro este plato"),
     INCORRECT_DESCRIPTION("Debe ingresar una descripción"),
     EXISTING_PLATE("Este plato ya existe."),

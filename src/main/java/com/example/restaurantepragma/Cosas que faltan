@@ -1,9 +1,3 @@
-Mirar lo de que si un plato no se puede repetir en una misma franchise pero si en otra franchise
-
-Hacer los usuarios y modificar todo el codigo par que funcione respecto a eso
+Hacer los usuarios y modificar todo el proyecto par que funcione respecto a eso
 
 Terminar las validaciones con entidad user cuando sea creada
-
-Organizar los paginables para poder elegir la pagina de menu
-
-Porner el for con el mapping de menu en la consulta de orden paginado para ver los atributos de los platos

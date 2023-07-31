@@ -40,7 +40,7 @@ public class MenuService {
                 throw new Exception(MenuResponses.INCORRECT_CATEGORY.getMessage());
             } else if (GeneralValidations.validationCampus(menu.getFranchise())) {
                 throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-            } else if (menuRepository.existsByNameMenu(menu.getNameMenu())) {
+            } else if (menuRepository.existsByNameMenuAndFranchise(menu.getNameMenu(),menu.getFranchise())) {
                 throw new Exception(MenuResponses.EXISTING_PLATE.getMessage());
             }
             menu.setState(true);

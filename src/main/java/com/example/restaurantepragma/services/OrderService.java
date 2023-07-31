@@ -17,6 +17,7 @@ import com.example.restaurantepragma.validations.GeneralValidations;
 import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,26 +43,26 @@ public class OrderService {
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-            Order orderEntity =  orderRepository.save(orderMapper.toOrder(order));
             List<OrderMenu> orderMenus = new ArrayList<>();
             List<String> incorrectFranchisePlate = new ArrayList<>();
+            Order orderEntity = new Order();
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
                 if (menuOptional.isPresent()) {
                     if(!order.getFranchise().equals(menuOptional.get().getFranchise())) incorrectFranchisePlate.add(menuOptional.get().getNameMenu());
-                    else if (menuOptional.get().getState()) orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
+                    else if (menuOptional.get().getState()){
+                        orderEntity =  orderRepository.save(orderMapper.toOrder(order));
+                        orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
+                    }
                     else throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
-            //Falta mirar bien porque se guarda el pedido aunque salte la excepcion
             if (incorrectFranchisePlate.isEmpty()){
                 ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
                 responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
                 return responseOrderDTO;
-            }else {
-                System.out.println(incorrectFranchisePlate);
-                throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
             }
+            throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
@@ -87,8 +88,13 @@ public class OrderService {
 
             Pageable pageable = PageRequest.of((page-1),numberRegister);
             Page<Order> paginatedOrders = orderRepository.findByStateRequestedAndFranchise(stateRequest,franchise,pageable);
-
-            return paginatedOrders.map(order -> orderMapper.toOrderDTO(order));
+            List<ResponseOrderDTO> responseOrderDTOS = new ArrayList<>();
+            for (Order order: paginatedOrders){
+                ResponseOrderDTO orderDTO = orderMapper.toOrderDTO(order);
+                orderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenuRepository.findByOrderId(order)));
+                responseOrderDTOS.add(orderDTO);
+            }
+            return new PageImpl<>(responseOrderDTOS,pageable,responseOrderDTOS.size());
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }

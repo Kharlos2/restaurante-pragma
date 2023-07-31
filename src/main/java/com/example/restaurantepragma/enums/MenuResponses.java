@@ -9,7 +9,7 @@ public enum MenuResponses {
     INCORRECT_FRANCHISE("Debe ingresar una sede correcta"),
     PLATE_NOT_FOUND("No se encontro este plato"),
     INCORRECT_DESCRIPTION("Debe ingresar una descripción"),
-    EXISTING_PLATE("Este plato ya existe."),
+    EXISTING_PLATE("Este plato ya existe en esta sede."),
     INNACTIVE_PLATE("Plato innactivo.")
     ;
 

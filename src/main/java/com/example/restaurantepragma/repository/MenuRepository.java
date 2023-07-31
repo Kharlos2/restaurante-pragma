@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu,Long> {
-    boolean existsByNameMenu(String name);
+    boolean existsByNameMenuAndFranchise(String name, String franchise);
 
     Page<Menu> findByCategoryAndFranchise(String category, String franchise, Pageable pageable);
 }

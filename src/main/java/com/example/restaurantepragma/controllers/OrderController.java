@@ -4,6 +4,7 @@ import com.example.restaurantepragma.dto.Order.OrderDTO;
 import com.example.restaurantepragma.dto.Order.OrderErrorDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.employee.EmployeeDTO;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.services.OrderService;
 import org.apache.catalina.startup.ExpandWar;
@@ -56,6 +57,14 @@ public class OrderController {
             List<OrderDTO> orderDTOList = new ArrayList<>();
             orderDTOList.add(new OrderErrorDTO(e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
+        }
+    }
+    @PutMapping("/{id}/")
+    public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long employee){
+        try {
+            return ResponseEntity.ok(orderService.updateEmployee(id,employee));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
 }

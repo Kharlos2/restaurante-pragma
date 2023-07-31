@@ -3,13 +3,16 @@ package com.example.restaurantepragma.services;
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.entities.Employee;
 import com.example.restaurantepragma.entities.Menu;
 import com.example.restaurantepragma.entities.Order;
 import com.example.restaurantepragma.entities.OrderMenu;
 import com.example.restaurantepragma.enums.MenuResponses;
+import com.example.restaurantepragma.enums.OrderResponses;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
+import com.example.restaurantepragma.repository.EmployeeRepository;
 import com.example.restaurantepragma.repository.MenuRepository;
 import com.example.restaurantepragma.repository.OrderMenuRepository;
 import com.example.restaurantepragma.repository.OrderRepository;
@@ -40,6 +43,7 @@ public class OrderService {
     @Autowired
     private OrderMenuMapper orderMenuMapper;
 
+    private EmployeeRepository employeeRepository;
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
@@ -95,6 +99,18 @@ public class OrderService {
                 responseOrderDTOS.add(orderDTO);
             }
             return new PageImpl<>(responseOrderDTOS,pageable,responseOrderDTOS.size());
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
+    public ResponseOrderDTO updateEmployee(Long id,Long employeeId)throws Exception{
+        try {
+            Employee employee = employeeRepository.findByEmployeeId(employeeId);
+            Optional<Order> order = orderRepository.findById(id);
+            if (order.isPresent()){
+                order.get().setEmployeeId(employee);
+                return orderMapper.toOrderDTO(orderRepository.save(order.get()));
+            }else throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }

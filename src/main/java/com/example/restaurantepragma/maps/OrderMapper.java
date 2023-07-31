@@ -15,7 +15,8 @@ public interface OrderMapper {
     @Mappings({
             @Mapping(source = "franchise", target = "sede"),
             @Mapping(source = "stateRequested", target = "estadoPededido"),
-            @Mapping(source = "orderMenus", target = "detallesOrden")
+            @Mapping(source = "orderMenus", target = "detallesOrden"),
+            @Mapping(source = "customerId", target = "cliente")
     })
     ResponseOrderDTO toOrderDTO(Order order);
     List<ResponseOrderDTO> toOrdersDTO(List<Order> orders);
@@ -27,7 +28,8 @@ public interface OrderMapper {
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "stateRequested", ignore = true),
-            @Mapping(target = "orderMenus", ignore = true)
+            @Mapping(target = "orderMenus", ignore = true),
+            @Mapping(target = "customerId", ignore = true)
     })
     Order toOrder (OrderRequestDTO orderRequestDTO);
 

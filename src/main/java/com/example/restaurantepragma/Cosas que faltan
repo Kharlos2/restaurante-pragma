@@ -1,3 +1,7 @@
 Hacer los usuarios y modificar todo el proyecto par que funcione respecto a eso
 
 Terminar las validaciones con entidad user cuando sea creada
+
+Modificar correctamente las respuestas http de los controladores
+
+cambiarle el nombre a los paquetes de DTO por minusculas

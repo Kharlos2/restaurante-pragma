@@ -7,6 +7,7 @@ import com.example.restaurantepragma.entities.Menu;
 import com.example.restaurantepragma.entities.Order;
 import com.example.restaurantepragma.entities.OrderMenu;
 import com.example.restaurantepragma.enums.MenuResponses;
+import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
 import com.example.restaurantepragma.repository.MenuRepository;
@@ -15,6 +16,9 @@ import com.example.restaurantepragma.repository.OrderRepository;
 import com.example.restaurantepragma.validations.GeneralValidations;
 import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -77,4 +81,16 @@ public class OrderService {
         }
     }
 
+    public Page<ResponseOrderDTO> findByStateRequestedAndFranchise(OrderStatus stateRequest, String franchise, Integer role, int numberRegister, int page)throws Exception{
+        try {
+            if (role!=1)throw new Exception(MenuResponses.NO_ADMIN.getMessage());
+
+            Pageable pageable = PageRequest.of((page-1),numberRegister);
+            Page<Order> paginatedOrders = orderRepository.findByStateRequestedAndFranchise(stateRequest,franchise,pageable);
+
+            return paginatedOrders.map(order -> orderMapper.toOrderDTO(order));
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
 }

@@ -3,8 +3,13 @@ package com.example.restaurantepragma.controllers;
 import com.example.restaurantepragma.dto.Order.OrderDTO;
 import com.example.restaurantepragma.dto.Order.OrderErrorDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
+import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.services.OrderService;
+import org.apache.catalina.startup.ExpandWar;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +36,26 @@ public class OrderController {
         try {
             return ResponseEntity.ok(new ArrayList<>(orderService.findAll()));
         }catch (Exception e){
-            throw new Exception(e.getMessage());
+            List<OrderDTO> orderDTOList = new ArrayList<>();
+            orderDTOList.add(new OrderErrorDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
+        }
+    }
+    @GetMapping("/state/franchise/")
+    public ResponseEntity<List<OrderDTO>> findByStateRequestedAndFranchise(
+            @RequestParam() OrderStatus orderStatus,
+            @RequestParam() String franchise,
+            @RequestParam() Integer role,
+            @RequestParam() int numberRegister,
+            @RequestParam() int page)throws Exception{
+        try {
+            Page<ResponseOrderDTO> responseOrderDTOs = orderService.findByStateRequestedAndFranchise(orderStatus,franchise,role,numberRegister,page);
+            List<ResponseOrderDTO> orderList = responseOrderDTOs.getContent();
+            return ResponseEntity.ok(new ArrayList<>(orderList));
+        }catch (Exception e){
+            List<OrderDTO> orderDTOList = new ArrayList<>();
+            orderDTOList.add(new OrderErrorDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
         }
     }
 }

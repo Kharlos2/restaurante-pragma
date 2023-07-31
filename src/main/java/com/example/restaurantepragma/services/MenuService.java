@@ -97,9 +97,9 @@ public class MenuService {
             throw new Exception(e.getMessage());
         }
     }
-    public Page<ResponseMenuDTO> findPlatesForCategotyAndFranchise(String category, String franchise, int numberRegister) throws Exception{
+    public Page<ResponseMenuDTO> findPlatesForCategotyAndFranchise(String category, String franchise, int numberRegister, int page) throws Exception{
         try {
-            Pageable pageable = PageRequest.of(0,numberRegister);
+            Pageable pageable = PageRequest.of((page-1),numberRegister);
             Page<Menu> menuPage = menuRepository.findByCategoryAndFranchise(category, franchise, pageable);
             return menuPage.map(menu -> menuMapper.toMenuDTO(menu));
         }catch (Exception e){

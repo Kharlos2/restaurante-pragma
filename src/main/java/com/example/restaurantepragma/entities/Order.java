@@ -1,5 +1,7 @@
 package com.example.restaurantepragma.entities;
 
+import com.example.restaurantepragma.enums.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -17,22 +19,32 @@ public class Order {
     private Integer role;
     private Integer acceptanceRole;
     private String franchise;
-    private String stateRequested = "EARNING";
+    @Enumerated(EnumType.STRING)
+    private OrderStatus stateRequested = OrderStatus.EARRING;
     @OneToMany(mappedBy = "orderId")
     @JsonManagedReference
     @JsonIgnore
     private List<OrderMenu> orderMenus;
-
+    @ManyToOne
+    @JsonManagedReference//cambio aqui
+    @JoinColumn
+    private Customer customerId;
+    @ManyToOne
+    @JsonBackReference
+    @JoinColumn
+    private Employee employeeId;
     public Order() {
     }
 
-    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, String stateRequested, List<OrderMenu> orderMenus) {
+    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, OrderStatus stateRequested, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId) {
         this.id = id;
         this.role = role;
         this.acceptanceRole = acceptanceRole;
         this.franchise = franchise;
         this.stateRequested = stateRequested;
         this.orderMenus = orderMenus;
+        this.customerId = customerId;
+        this.employeeId = employeeId;
     }
 
     public Long getId() {
@@ -67,11 +79,11 @@ public class Order {
         this.franchise = franchise;
     }
 
-    public String getStateRequested() {
+    public OrderStatus getStateRequested() {
         return stateRequested;
     }
 
-    public void setStateRequested(String stateRequested) {
+    public void setStateRequested(OrderStatus stateRequested) {
         this.stateRequested = stateRequested;
     }
 
@@ -81,5 +93,21 @@ public class Order {
 
     public void setOrderMenus(List<OrderMenu> orderMenus) {
         this.orderMenus = orderMenus;
+    }
+
+    public Customer getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Customer customerId) {
+        this.customerId = customerId;
+    }
+
+    public Employee getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(Employee employeeId) {
+        this.employeeId = employeeId;
     }
 }

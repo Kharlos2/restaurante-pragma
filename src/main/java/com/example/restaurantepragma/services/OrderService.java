@@ -3,18 +3,26 @@ package com.example.restaurantepragma.services;
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.entities.Employee;
 import com.example.restaurantepragma.entities.Menu;
 import com.example.restaurantepragma.entities.Order;
 import com.example.restaurantepragma.entities.OrderMenu;
 import com.example.restaurantepragma.enums.MenuResponses;
+import com.example.restaurantepragma.enums.OrderResponses;
+import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
+import com.example.restaurantepragma.repository.EmployeeRepository;
 import com.example.restaurantepragma.repository.MenuRepository;
 import com.example.restaurantepragma.repository.OrderMenuRepository;
 import com.example.restaurantepragma.repository.OrderRepository;
 import com.example.restaurantepragma.validations.GeneralValidations;
 import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,29 +43,30 @@ public class OrderService {
     @Autowired
     private OrderMenuMapper orderMenuMapper;
 
+    private EmployeeRepository employeeRepository;
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-            Order orderEntity =  orderRepository.save(orderMapper.toOrder(order));
             List<OrderMenu> orderMenus = new ArrayList<>();
             List<String> incorrectFranchisePlate = new ArrayList<>();
+            Order orderEntity = new Order();
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
                 if (menuOptional.isPresent()) {
                     if(!order.getFranchise().equals(menuOptional.get().getFranchise())) incorrectFranchisePlate.add(menuOptional.get().getNameMenu());
-                    else if (menuOptional.get().getState()) orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
+                    else if (menuOptional.get().getState()){
+                        orderEntity =  orderRepository.save(orderMapper.toOrder(order));
+                        orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
+                    }
                     else throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
-            //Falta mirar bien porque se guarda el pedido aunque salte la excepcion
             if (incorrectFranchisePlate.isEmpty()){
                 ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
                 responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
                 return responseOrderDTO;
-            }else {
-                System.out.println(incorrectFranchisePlate);
-                throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
             }
+            throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
@@ -77,4 +86,33 @@ public class OrderService {
         }
     }
 
+    public Page<ResponseOrderDTO> findByStateRequestedAndFranchise(OrderStatus stateRequest, String franchise, Integer role, int numberRegister, int page)throws Exception{
+        try {
+            if (role!=1)throw new Exception(MenuResponses.NO_ADMIN.getMessage());
+
+            Pageable pageable = PageRequest.of((page-1),numberRegister);
+            Page<Order> paginatedOrders = orderRepository.findByStateRequestedAndFranchise(stateRequest,franchise,pageable);
+            List<ResponseOrderDTO> responseOrderDTOS = new ArrayList<>();
+            for (Order order: paginatedOrders){
+                ResponseOrderDTO orderDTO = orderMapper.toOrderDTO(order);
+                orderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenuRepository.findByOrderId(order)));
+                responseOrderDTOS.add(orderDTO);
+            }
+            return new PageImpl<>(responseOrderDTOS,pageable,responseOrderDTOS.size());
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
+    public ResponseOrderDTO updateEmployee(Long id,Long employeeId)throws Exception{
+        try {
+            Employee employee = employeeRepository.findByEmployeeId(employeeId);
+            Optional<Order> order = orderRepository.findById(id);
+            if (order.isPresent()){
+                order.get().setEmployeeId(employee);
+                return orderMapper.toOrderDTO(orderRepository.save(order.get()));
+            }else throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
 }

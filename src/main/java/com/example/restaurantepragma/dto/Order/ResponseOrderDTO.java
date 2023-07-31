@@ -1,13 +1,16 @@
 package com.example.restaurantepragma.dto.Order;
 
 import com.example.restaurantepragma.dto.OrderMenu.ResponseOrderMenuDTO;
+import com.example.restaurantepragma.entities.Customer;
+import com.example.restaurantepragma.enums.OrderStatus;
 
 
 import java.util.List;
 
 public class ResponseOrderDTO extends OrderDTO{
     private String sede;
-    private String estadoPededido;
+    private OrderStatus estadoPededido;
+    private Customer cliente;
     private List<ResponseOrderMenuDTO> detallesOrden;
 
     public String getSede() {
@@ -18,11 +21,11 @@ public class ResponseOrderDTO extends OrderDTO{
         this.sede = sede;
     }
 
-    public String getEstadoPededido() {
+    public OrderStatus getEstadoPededido() {
         return estadoPededido;
     }
 
-    public void setEstadoPededido(String estadoPededido) {
+    public void setEstadoPededido(OrderStatus estadoPededido) {
         this.estadoPededido = estadoPededido;
     }
 
@@ -32,5 +35,13 @@ public class ResponseOrderDTO extends OrderDTO{
 
     public void setDetallesOrden(List<ResponseOrderMenuDTO> detallesOrden) {
         this.detallesOrden = detallesOrden;
+    }
+
+    public Customer getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Customer cliente) {
+        this.cliente = cliente;
     }
 }

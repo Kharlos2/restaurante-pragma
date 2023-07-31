@@ -1,1 +1,7 @@
-Mirar lo de que si un plato no se puede repetir en una misma franchise pero si en otra franchise
+Hacer los usuarios y modificar todo el proyecto par que funcione respecto a eso
+
+Terminar las validaciones con entidad user cuando sea creada
+
+Modificar correctamente las respuestas http de los controladores
+
+cambiarle el nombre a los paquetes de DTO por minusculas

@@ -23,13 +23,16 @@ public interface OrderMapper {
 
     @InheritInverseConfiguration
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "customerId", ignore = true)
+
     Order toOrder (ResponseOrderDTO responseOrderDTO);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "stateRequested", ignore = true),
             @Mapping(target = "orderMenus", ignore = true),
-            @Mapping(target = "customerId", ignore = true)
+            @Mapping(target = "employeeId", ignore = true),
+            @Mapping(source = "customerId", target = "customerId.id")
     })
     Order toOrder (OrderRequestDTO orderRequestDTO);
 

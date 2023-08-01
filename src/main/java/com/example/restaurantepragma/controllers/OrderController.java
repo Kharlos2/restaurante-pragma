@@ -59,8 +59,8 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
         }
     }
-    @PutMapping("/{id}/")
-    public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long employee){
+    @PutMapping("/employee/{id}/{employee}")
+    public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, Long employee){
         try {
             return ResponseEntity.ok(orderService.updateEmployee(id,employee));
         }catch (Exception e){

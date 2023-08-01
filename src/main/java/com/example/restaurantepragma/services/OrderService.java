@@ -3,21 +3,15 @@ package com.example.restaurantepragma.services;
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
-import com.example.restaurantepragma.entities.Employee;
-import com.example.restaurantepragma.entities.Menu;
-import com.example.restaurantepragma.entities.Order;
-import com.example.restaurantepragma.entities.OrderMenu;
+import com.example.restaurantepragma.entities.*;
+import com.example.restaurantepragma.enums.CustomerResponses;
 import com.example.restaurantepragma.enums.MenuResponses;
 import com.example.restaurantepragma.enums.OrderResponses;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
-import com.example.restaurantepragma.repository.EmployeeRepository;
-import com.example.restaurantepragma.repository.MenuRepository;
-import com.example.restaurantepragma.repository.OrderMenuRepository;
-import com.example.restaurantepragma.repository.OrderRepository;
+import com.example.restaurantepragma.repository.*;
 import com.example.restaurantepragma.validations.GeneralValidations;
-import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +25,6 @@ import java.util.Optional;
 
 @Service
 public class OrderService {
-
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
@@ -42,31 +35,33 @@ public class OrderService {
     private MenuRepository menuRepository;
     @Autowired
     private OrderMenuMapper orderMenuMapper;
-
+    @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-            List<OrderMenu> orderMenus = new ArrayList<>();
-            List<String> incorrectFranchisePlate = new ArrayList<>();
-            Order orderEntity = new Order();
+            //Busco por el id de cliente para asignarlo al orderEntity
+            Optional<Customer> customer = customerRepository.findById(order.getCustomerId());
+            if (customer.isEmpty()) throw new Exception(CustomerResponses.NOT_FOUNT.getMessage());
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
                 if (menuOptional.isPresent()) {
-                    if(!order.getFranchise().equals(menuOptional.get().getFranchise())) incorrectFranchisePlate.add(menuOptional.get().getNameMenu());
-                    else if (menuOptional.get().getState()){
-                        orderEntity =  orderRepository.save(orderMapper.toOrder(order));
-                        orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
-                    }
-                    else throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
+                    if(!order.getFranchise().equals(menuOptional.get().getFranchise())) throw new Exception("El plato "+ menuOptional.get().getNameMenu()+" no esta en esta sede");
+                    else if (!menuOptional.get().getState()) throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
-            if (incorrectFranchisePlate.isEmpty()){
-                ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
-                responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
-                return responseOrderDTO;
+            Order orderEntity = orderRepository.save(orderMapper.toOrder(order));
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
+            List<OrderMenu> orderMenus = new ArrayList<>();
+            for (MenuRequestDTO menuRequestDTO:order.getOrderMenus()) {
+                orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(), orderEntity, menuRepository.findById(menuRequestDTO.getMenuId()).get())));
             }
-            throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
+            responseOrderDTO.setCliente(customer.get());
+            responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
+            return responseOrderDTO;
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }

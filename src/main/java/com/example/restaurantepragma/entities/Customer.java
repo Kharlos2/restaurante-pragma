@@ -1,6 +1,5 @@
 package com.example.restaurantepragma.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -19,7 +18,7 @@ public class Customer {
     private String nameCustomer;
     private Boolean status;
     @OneToMany(mappedBy = "customerId")
-    @JsonBackReference
+    @JsonManagedReference
     @JsonIgnore
     private List<Order> orders;
 
@@ -64,4 +63,5 @@ public class Customer {
     public void setOrders(List<Order> orders) {
         this.orders = orders;
     }
+
 }

@@ -26,51 +26,75 @@ public class MenuService {
     @Autowired
     private MenuMapper menuMapper;
 
+    // Método para guardar un menú en la base de datos
     public ResponseMenuDTO save(Menu menu)throws Exception{
         try {
+            // Validar si todos los campos del menú están completos.
             if (MenuValidations.fullFields(menu)){
                 throw new Exception(MenuResponses.EMPTY_FIELDS.getMessage());
-            } else if (MenuValidations.validationUser(menu.getRole())){
+            } // Validar si el usuario que intenta crear el menú es un administrador.
+            else if (MenuValidations.validationUser(menu.getRole())){
                 throw new Exception(MenuResponses.NO_ADMIN.getMessage());
-            } else if (MenuValidations.rightPrice(menu.getPrice())){
+            }
+            // Validar si el precio del menú es válido (mayor que cero).
+            else if (MenuValidations.rightPrice(menu.getPrice())){
                 throw new Exception(MenuResponses.WRONG_PRICE.getMessage());
-            }else if (MenuValidations.rightPreparationTime(menu.getPreparationTime())) {
+            }// Validar si el tiempo de preparación del menú es válido (mayor que cero).
+            else if (MenuValidations.rightPreparationTime(menu.getPreparationTime())) {
                 throw new Exception(MenuResponses.INCORRECT_PREPARATION_TIME.getMessage());
-            }else if (GeneralValidations.validationCategory(menu.getCategory())){
+            }// Validar si la categoría del menú es válida.
+            else if (GeneralValidations.validationCategory(menu.getCategory())){
                 throw new Exception(MenuResponses.INCORRECT_CATEGORY.getMessage());
-            } else if (GeneralValidations.validationCampus(menu.getFranchise())) {
+            }// Validar si la franquicia del menú es válida.
+            else if (GeneralValidations.validationCampus(menu.getFranchise())) {
                 throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-            } else if (menuRepository.existsByNameMenuAndFranchise(menu.getNameMenu(),menu.getFranchise())) {
+            } // Validar si ya existe un menú con el mismo nombre y franquicia.
+            else if (menuRepository.existsByNameMenuAndFranchise(menu.getNameMenu(),menu.getFranchise())) {
                 throw new Exception(MenuResponses.EXISTING_PLATE.getMessage());
             }
+
+            // Establecer el estado del menú como activo (true).
             menu.setState(true);
             return menuMapper.toMenuDTO(menuRepository.save(menu));
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
     }
+
+    // Método para obtener todos los menús existentes en la base de datos.
     public List<ResponseMenuDTO> findAll() throws Exception {
         try {
+            // Se obtienen todos los menús y se mapean a DTOs para su respuesta
             return menuMapper.toMenusDTO(menuRepository.findAll());
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
     }
+
+    // Método para actualizar un menú existente en la base de datos.
     public ResponseMenuDTO update(MenuUpdateDTO menu, Long id, Integer user) throws Exception{
         try {
             Optional<Menu> search = menuRepository.findById(id);
 
-            if(search.isPresent()){
+
+            if(search.isPresent()){ // Validar si el precio del menú es válido (mayor que cero).
                 Menu menuUpdate = search.get();
                 if (MenuValidations.rightPrice(menu.getPrice())){
                     throw new Exception(MenuResponses.WRONG_PRICE.getMessage());
-                } else if (GeneralValidations.validationCampus(menu.getFranchise())) {
+
+                }// Validar si la franquicia del menú es válida.
+                else if (GeneralValidations.validationCampus(menu.getFranchise())) {
                     throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-                }else if (MenuValidations.incorrectString(menu.getDescription())){
+
+                }// Validar si la descripción del menú es válida.
+                else if (MenuValidations.incorrectString(menu.getDescription())){
                     throw new Exception(MenuResponses.INCORRECT_DESCRIPTION.getMessage());
-                } else if (MenuValidations.validationUser(user)){
+
+                }// Validar si el usuario que intenta actualizar el menú es un administrador.
+                else if (MenuValidations.validationUser(user)){
                     throw new Exception(MenuResponses.NO_ADMIN.getMessage());
                 }
+                // Actualizar los campos del menú con los valores proporcionados.
                 menuUpdate.setPrice(menu.getPrice());
                 menuUpdate.setFranchise(menu.getFranchise());
                 menuUpdate.setDescription(menuUpdate.getDescription());
@@ -81,14 +105,18 @@ public class MenuService {
             throw new Exception(e.getMessage());
         }
     }
+
+    // Método para cambiar el estado de un menú (activar/desactivar) en la base de datos.
     public MenuStateDTO updateState(Long id, Integer user) throws Exception{
         try{
             Optional<Menu> search = menuRepository.findById(id);
             if (search.isPresent()){
                 Menu update = search.get();
+                // Validar si el usuario que intenta cambiar el estado del menú es un administrador.
                 if (MenuValidations.validationUser(user)){
                     throw new Exception(MenuResponses.NO_ADMIN.getMessage());
                 }
+                // Cambiar el estado del menú a su valor opuesto (activo/inactivo).
                 update.setState(!update.getState());
                 return menuMapper.toMenuState(menuRepository.save(update));
             }
@@ -97,10 +125,15 @@ public class MenuService {
             throw new Exception(e.getMessage());
         }
     }
+
+    // Método para obtener una lista paginada de menús según la categoría y franquicia especificadas.
     public Page<ResponseMenuDTO> findPlatesForCategotyAndFranchise(String category, String franchise, int numberRegister, int page) throws Exception{
         try {
+            // Se define el objeto Pageable para la paginación y se obtienen los menús según la categoría y franquicia
             Pageable pageable = PageRequest.of((page-1),numberRegister);
             Page<Menu> menuPage = menuRepository.findByCategoryAndFranchise(category, franchise, pageable);
+
+            // Se mapean los menús a DTOs para su respuesta
             return menuPage.map(menu -> menuMapper.toMenuDTO(menu));
         }catch (Exception e){
             throw new Exception(e.getMessage());

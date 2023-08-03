@@ -11,7 +11,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EmployeeMapper {
 
+    @Mapping(target = "id", source = "employeeId")
     // Anotación @Mapping para indicar cómo se debe mapear la propiedad "orders" a "ordenes" en el DTO
+
     @Mapping(target = "ordenes", source = "orders")
 
     // Anotación @Mapping para indicar cómo se debe mapear la propiedad "nameEmployee" a "nombre" en el DTO

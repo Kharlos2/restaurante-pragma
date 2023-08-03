@@ -1,7 +1,7 @@
 package com.example.restaurantepragma.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class Employee {
     private String nameEmployee;
     private String password;
     @OneToMany(mappedBy = "employeeId")
-    @JsonBackReference
+    @JsonManagedReference
     @JsonIgnore
     private List<Order> orders;
 

@@ -40,6 +40,10 @@ public class Menu {
     public Menu() {
     }
 
+    public Menu(Long id) {
+        this.id = id;
+    }
+
     public Menu(Long id, Integer role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String franchise, Double preparationTime) {
         this.id = id;
         this.role = role;

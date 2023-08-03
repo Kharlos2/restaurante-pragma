@@ -81,9 +81,10 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
         }
     }
+    
 
     // PUT para actualizar el empleado asignado a una orden
-    @PutMapping("/{id}/")
+    @PutMapping("/employee/{id}/{employee}")
     public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long employee) {
         try {
             // Llama al servicio para actualizar el empleado asignado a la orden y devuelve el resultado con estado HTTP 200 OK

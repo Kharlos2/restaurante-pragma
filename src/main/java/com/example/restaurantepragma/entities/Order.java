@@ -22,17 +22,17 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus stateRequested = OrderStatus.EARRING;
     @OneToMany(mappedBy = "orderId")
-    @JsonManagedReference
+    @JsonBackReference
     @JsonIgnore
     private List<OrderMenu> orderMenus;
     @ManyToOne
-    @JsonManagedReference//cambio aqui
-    @JoinColumn
+    @JsonBackReference
+    @JoinColumn(name = "customer_id")
     private Customer customerId;
     @ManyToOne
     @JsonBackReference
-    @JoinColumn
-    private Employee employeeId;
+    @JoinColumn(name = "employeeId")
+    private Employee employeeId = null;
     public Order() {
     }
 

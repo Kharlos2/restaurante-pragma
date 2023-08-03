@@ -3,6 +3,7 @@ package com.example.restaurantepragma.services;
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.OrderMenu.ResponseOrderMenuDTO;
 import com.example.restaurantepragma.entities.*;
 import com.example.restaurantepragma.enums.CustomerResponses;
 import com.example.restaurantepragma.enums.MenuResponses;
@@ -102,10 +103,14 @@ public class OrderService {
         try {
             Employee employee = employeeRepository.findByEmployeeId(employeeId);
             Optional<Order> order = orderRepository.findById(id);
-            if (order.isPresent()){
-                order.get().setEmployeeId(employee);
-                return orderMapper.toOrderDTO(orderRepository.save(order.get()));
-            }else throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            List<OrderMenu> orderMenus = order.get().getOrderMenus();
+            List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+            if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            order.get().setEmployeeId(employee);
+            order.get().setOrderMenus(orderMenus);
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+            responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+            return responseOrderDTO;
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }

@@ -41,19 +41,26 @@ public class OrderService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    // Método para guardar una nueva orden
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
+            // Validación del campus/franquicia
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
             //Busco por el id de cliente para asignarlo al orderEntity
             Optional<Customer> customer = customerRepository.findById(order.getCustomerId());
             if (customer.isEmpty()) throw new Exception(CustomerResponses.NOT_FOUNT.getMessage());
+            // Recorremos cada elemento de la lista de menús que viene en el DTO de la orden
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
+                // Buscamos el menú correspondiente en la base de datos
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
                 if (menuOptional.isPresent()) {
+                     // Validamos si el menú tiene una franquicia diferente a la especificada en la orden
                     if(!order.getFranchise().equals(menuOptional.get().getFranchise())) throw new Exception("El plato "+ menuOptional.get().getNameMenu()+" no esta en esta sede");
+                    // Validamos si el menú está activo (estado true)
                     else if (!menuOptional.get().getState()) throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
+            // Guardamos la orden en la base de datos y obtenemos la entidad creada
             Order orderEntity = orderRepository.save(orderMapper.toOrder(order));
             ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
             List<OrderMenu> orderMenus = new ArrayList<>();
@@ -67,10 +74,14 @@ public class OrderService {
             throw new Exception(e.getMessage());
         }
     }
+    // Método para obtener todas las órdenes
     public List<ResponseOrderDTO> findAll()throws Exception{
         try {
+            // Obtenemos todas las órdenes de la base de datos
             List<Order> orders = orderRepository.findAll();
             List<ResponseOrderDTO> responseOrderDTOS = new ArrayList<>();
+
+            // Para cada orden encontrada, creamos un DTO de respuesta y agregamos los detalles de la orden (OrderMenu)
             for (Order order : orders){
                 ResponseOrderDTO orderDTO = orderMapper.toOrderDTO(order);
                 orderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenuRepository.findByOrderId(order)));
@@ -78,30 +89,41 @@ public class OrderService {
             }
             return responseOrderDTOS;
         }catch (Exception e){
+            // Capturamos y relanzamos cualquier excepción ocurrida
             throw new Exception(e.getMessage());
         }
     }
 
+    // Método para buscar órdenes por estado, franquicia y paginación
     public Page<ResponseOrderDTO> findByStateRequestedAndFranchise(OrderStatus stateRequest, String franchise, Integer role, int numberRegister, int page)throws Exception{
         try {
+            // Validamos si el rol es de administrador (role = 1)
             if (role!=1)throw new Exception(MenuResponses.NO_ADMIN.getMessage());
 
+            // Creamos una página con la información de las órdenes solicitadas
             Pageable pageable = PageRequest.of((page-1),numberRegister);
             Page<Order> paginatedOrders = orderRepository.findByStateRequestedAndFranchise(stateRequest,franchise,pageable);
             List<ResponseOrderDTO> responseOrderDTOS = new ArrayList<>();
+
+            // Para cada orden encontrada en la página, creamos un DTO de respuesta y agregamos los detalles de la orden (OrderMenu)
             for (Order order: paginatedOrders){
                 ResponseOrderDTO orderDTO = orderMapper.toOrderDTO(order);
                 orderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenuRepository.findByOrderId(order)));
                 responseOrderDTOS.add(orderDTO);
             }
+            // Creamos y devolvemos una nueva página con los resultados y la paginación
             return new PageImpl<>(responseOrderDTOS,pageable,responseOrderDTOS.size());
         }catch (Exception e){
+            // Capturamos y relanzamos cualquier excepción ocurrida
             throw new Exception(e.getMessage());
         }
     }
-    public ResponseOrderDTO updateEmployee(Long id,Long employeeId)throws Exception{
+    // Método para actualizar el empleado asignado a una orden
+    public ResponseOrderDTO updateEmployee(Long id,Long employeeId)throws Exception {
         try {
+            // Buscamos el empleado por su id en la base de datos
             Employee employee = employeeRepository.findByEmployeeId(employeeId);
+            // Buscamos la orden por su id en la base de datos
             Optional<Order> order = orderRepository.findById(id);
             List<OrderMenu> orderMenus = order.get().getOrderMenus();
             List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
@@ -112,6 +134,7 @@ public class OrderService {
             responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
             return responseOrderDTO;
         }catch (Exception e){
+
             throw new Exception(e.getMessage());
         }
     }

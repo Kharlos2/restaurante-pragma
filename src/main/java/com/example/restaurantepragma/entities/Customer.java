@@ -12,15 +12,16 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "employee_id")
+    @Column(name = "employee_id") // Definición de la columna para la clave primaria "id"
     private Long id;
-    @Column(name = "name_customer")
+    @Column(name = "name_customer") // Definición de la columna para el nombre del cliente "nameCustomer"
     private String nameCustomer;
-    private Boolean status;
-    @OneToMany(mappedBy = "customerId")
-    @JsonManagedReference
-    @JsonIgnore
-    private List<Order> orders;
+  
+    private Boolean status; // Estado del cliente, por ejemplo, activo o inactivo
+    @OneToMany(mappedBy = "customerId") // Relación uno a muchos con la entidad "Order" a través del atributo "customerId" en la entidad "Order"
+    @JsonBackReference // Anotación para evitar la recursión infinita al serializar la lista de pedidos (orden inverso de serialización)
+    @JsonIgnore // Anotación para evitar la serialización de la lista de pedidos (ignora este atributo al serializar)
+    private List<Order> orders; // Lista de pedidos realizados por el cliente
 
     public Customer() {
     }

@@ -74,6 +74,7 @@ public class OrderService {
             throw new Exception(e.getMessage());
         }
     }
+
     // Método para obtener todas las órdenes
     public List<ResponseOrderDTO> findAll()throws Exception{
         try {
@@ -123,18 +124,78 @@ public class OrderService {
         try {
             // Buscamos el empleado por su id en la base de datos
             Employee employee = employeeRepository.findByEmployeeId(employeeId);
+
             // Buscamos la orden por su id en la base de datos
             Optional<Order> order = orderRepository.findById(id);
+
+            // Obtiene la lista de OrderMenu asociada a la orden actual.
             List<OrderMenu> orderMenus = order.get().getOrderMenus();
+
+            // Mapea la lista de objetos OrderMenu a una lista de objetos ResponseOrderMenuDTO
+            // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
             List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+
+            // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
             if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+
+            // Establece el identificador del empleado asociado a la orden actual
             order.get().setEmployeeId(employee);
+
+            // Establece la lista de OrderMenu asociada a la orden actual.
             order.get().setOrderMenus(orderMenus);
+
+            // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
+            // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
             ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+
+            // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
             responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+
+            // Retorna el objeto ResponseOrderDTO que contiene los detalles de la orden y la información general de la orden guardada.
             return responseOrderDTO;
+
         }catch (Exception e){
 
+            // En caso de que ocurra una excepción durante el proceso, se lanza una nueva excepción con el mensaje de error original.
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public ResponseOrderDTO updateState(Long id)throws Exception {
+        try {
+            // Buscamos la orden por su id en la base de datos
+            Optional<Order> order = orderRepository.findById(id);
+
+            // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
+            if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+
+            // Obtiene la lista de OrderMenu asociada a la orden actual.
+            List<OrderMenu> orderMenus = order.get().getOrderMenus();
+
+            // Mapea la lista de objetos OrderMenu a una lista de objetos ResponseOrderMenuDTO
+            // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
+            List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+
+            // Verifica el estado de orden y si esta igual algun estado de preparacion regresa el estado en el que continua el proceso
+            if (order.get().getStateRequested().equals(OrderStatus.EARRING)) order.get().setStateRequested(OrderStatus.IN_PREPARATION);
+            else if (order.get().getStateRequested().equals(OrderStatus.IN_PREPARATION)) order.get().setStateRequested(OrderStatus.READY);
+            else if (order.get().getStateRequested().equals(OrderStatus.READY)) order.get().setStateRequested(OrderStatus.DELIVERED);
+            else if (order.get().getStateRequested().equals(OrderStatus.DELIVERED)) throw new Exception(OrderResponses.ORDER_DELIVERED.getMessage());
+            else if (order.get().getStateRequested().equals(OrderStatus.CANCELLED)) throw new Exception(OrderResponses.ORDER_CANCELLED.getMessage());
+
+            // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
+            // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+
+            // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
+            responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+
+            // Retorna el objeto ResponseOrderDTO que contiene los detalles de la orden y la información general de la orden guardada.
+            return responseOrderDTO;
+
+        }catch (Exception e){
+
+            // En caso de que ocurra una excepción durante el proceso, se lanza una nueva excepción con el mensaje de error original.
             throw new Exception(e.getMessage());
         }
     }

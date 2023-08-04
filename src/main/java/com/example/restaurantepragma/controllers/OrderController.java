@@ -81,7 +81,6 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
         }
     }
-    
 
     // PUT para actualizar el empleado asignado a una orden
     @PutMapping("/employee/{id}/{employee}")
@@ -89,6 +88,16 @@ public class OrderController {
         try {
             // Llama al servicio para actualizar el empleado asignado a la orden y devuelve el resultado con estado HTTP 200 OK
             return ResponseEntity.ok(orderService.updateEmployee(id, employee));
+        } catch (Exception e) {
+            // Si ocurre una excepción, devuelve un mensaje de error con estado HTTP 400 BAD_REQUEST
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
+        }
+    }
+    @PutMapping("/employee/{id}")
+    public ResponseEntity<OrderDTO> uptadeState(@PathVariable Long id) {
+        try {
+            // Llama al servicio para actualizar el empleado asignado a la orden y devuelve el resultado con estado HTTP 200 OK
+            return ResponseEntity.ok(orderService.updateState(id));
         } catch (Exception e) {
             // Si ocurre una excepción, devuelve un mensaje de error con estado HTTP 400 BAD_REQUEST
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));

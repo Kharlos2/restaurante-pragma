@@ -1,13 +1,13 @@
 package com.example.restaurantepragma.dto.Order;
 
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
-
 import java.util.List;
 
 public class OrderRequestDTO extends OrderDTO{
     private Integer role;
     private Integer acceptanceRole;
     private String franchise;
+    private Long customerId;
     private List<MenuRequestDTO> orderMenus;
 
     public Integer getRole() {
@@ -40,5 +40,13 @@ public class OrderRequestDTO extends OrderDTO{
 
     public void setOrderMenus(List<MenuRequestDTO> orderMenus) {
         this.orderMenus = orderMenus;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 }

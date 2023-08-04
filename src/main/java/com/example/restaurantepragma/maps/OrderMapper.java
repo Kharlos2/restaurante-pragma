@@ -34,6 +34,7 @@ public interface OrderMapper {
     // Además, se ignora la propiedad 'id' del objeto Order, lo que significa que no se tendrá en cuenta al realizar la conversión
     @InheritInverseConfiguration
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "customerId", ignore = true)
     // Este método convierte un objeto ResponseOrderDTO en un objeto Order aplicando las asignaciones invertidas.
     Order toOrder (ResponseOrderDTO responseOrderDTO);
 
@@ -42,7 +43,8 @@ public interface OrderMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "stateRequested", ignore = true),
             @Mapping(target = "orderMenus", ignore = true),
-            @Mapping(target = "customerId", ignore = true)
+            @Mapping(target = "employeeId", ignore = true),
+            @Mapping(source = "customerId", target = "customerId.id")
     })
     // Este método convierte un objeto OrderRequestDTO en un objeto Order aplicando las asignaciones definidas.
     Order toOrder (OrderRequestDTO orderRequestDTO);

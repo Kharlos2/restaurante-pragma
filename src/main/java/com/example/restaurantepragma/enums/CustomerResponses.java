@@ -1,13 +1,11 @@
 package com.example.restaurantepragma.enums;
 
-public enum OrderResponses {
-    NOT_FOUNT_ORDER("No se encontro esta orden."),
-    ORDER_CANCELLED("Ya se ha cancelado la orden"),
-    ORDER_DELIVERED("Ya se ha entregado la orden");
+public enum CustomerResponses {
+    NOT_FOUNT("Este cliente no fue encontrado.");
 
     private String message;
 
-    OrderResponses(String message) {
+    CustomerResponses(String message) {
         this.message = message;
     }
 

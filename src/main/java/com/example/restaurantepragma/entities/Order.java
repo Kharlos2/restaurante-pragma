@@ -3,7 +3,6 @@ package com.example.restaurantepragma.entities;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -21,18 +20,19 @@ public class Order {
     private String franchise;
     @Enumerated(EnumType.STRING)
     private OrderStatus stateRequested = OrderStatus.EARRING;
+
     @OneToMany(mappedBy = "orderId")
-    @JsonManagedReference
+    @JsonBackReference
     @JsonIgnore
     private List<OrderMenu> orderMenus;
     @ManyToOne
-    @JsonManagedReference//cambio aqui
-    @JoinColumn
+    @JsonBackReference
+    @JoinColumn(name = "customer_id")
     private Customer customerId;
     @ManyToOne
     @JsonBackReference
-    @JoinColumn
-    private Employee employeeId;
+    @JoinColumn(name = "employeeId")
+    private Employee employeeId = null;
     public Order() {
     }
 

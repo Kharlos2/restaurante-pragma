@@ -3,21 +3,16 @@ package com.example.restaurantepragma.services;
 import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
-import com.example.restaurantepragma.entities.Employee;
-import com.example.restaurantepragma.entities.Menu;
-import com.example.restaurantepragma.entities.Order;
-import com.example.restaurantepragma.entities.OrderMenu;
+import com.example.restaurantepragma.dto.OrderMenu.ResponseOrderMenuDTO;
+import com.example.restaurantepragma.entities.*;
+import com.example.restaurantepragma.enums.CustomerResponses;
 import com.example.restaurantepragma.enums.MenuResponses;
 import com.example.restaurantepragma.enums.OrderResponses;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
-import com.example.restaurantepragma.repository.EmployeeRepository;
-import com.example.restaurantepragma.repository.MenuRepository;
-import com.example.restaurantepragma.repository.OrderMenuRepository;
-import com.example.restaurantepragma.repository.OrderRepository;
+import com.example.restaurantepragma.repository.*;
 import com.example.restaurantepragma.validations.GeneralValidations;
-import com.example.restaurantepragma.validations.OrderValidations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +26,6 @@ import java.util.Optional;
 
 @Service
 public class OrderService {
-
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
@@ -42,60 +36,45 @@ public class OrderService {
     private MenuRepository menuRepository;
     @Autowired
     private OrderMenuMapper orderMenuMapper;
-
-    // No se está inyectando EmployeeRepository. Hace falta el @Autowired
-
+    @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     // Método para guardar una nueva orden
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
         try{
             // Validación del campus/franquicia
             if (GeneralValidations.validationCampus(order.getFranchise())) throw new Exception(MenuResponses.INCORRECT_FRANCHISE.getMessage());
-
-            // Lista para almacenar los detalles de la orden (OrderMenu)
-            List<OrderMenu> orderMenus = new ArrayList<>();
-
-            // Lista para almacenar los platos con franquicia incorrecta
-            List<String> incorrectFranchisePlate = new ArrayList<>();
-
-            // Creación de la entidad Order a partir del DTO recibido
-            Order orderEntity = new Order();
-
+            //Busco por el id de cliente para asignarlo al orderEntity
+            Optional<Customer> customer = customerRepository.findById(order.getCustomerId());
+            if (customer.isEmpty()) throw new Exception(CustomerResponses.NOT_FOUNT.getMessage());
             // Recorremos cada elemento de la lista de menús que viene en el DTO de la orden
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 // Buscamos el menú correspondiente en la base de datos
                 Optional<Menu> menuOptional = menuRepository.findById(menuRequestDTO.getMenuId());
-
                 if (menuOptional.isPresent()) {
-                    // Validamos si el menú tiene una franquicia diferente a la especificada en la orden
-                    if (!order.getFranchise().equals(menuOptional.get().getFranchise()))
-                        if(!order.getFranchise().equals(menuOptional.get().getFranchise())) incorrectFranchisePlate.add(menuOptional.get().getNameMenu());
-                            // Validamos si el menú está activo (estado true)
-
-                        else if (menuOptional.get().getState()){
-                            // Guardamos la orden en la base de datos y obtenemos la entidad creada
-                            orderEntity =  orderRepository.save(orderMapper.toOrder(order));
-                            // Guardamos los detalles de la orden (OrderMenu) en la base de datos y obtenemos la entidad creada
-                            orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(),orderEntity,menuOptional.get())));
-                        }
-                        // Lanzamos una excepción si el menú está inactivo
-                        else throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
+                     // Validamos si el menú tiene una franquicia diferente a la especificada en la orden
+                    if(!order.getFranchise().equals(menuOptional.get().getFranchise())) throw new Exception("El plato "+ menuOptional.get().getNameMenu()+" no esta en esta sede");
+                    // Validamos si el menú está activo (estado true)
+                    else if (!menuOptional.get().getState()) throw new Exception(MenuResponses.INNACTIVE_PLATE.getMessage());
                 }else throw new Exception(MenuResponses.PLATE_NOT_FOUND.getMessage());
             }
-            // Lanzamos una excepción si el menú está inactivo
-            if (incorrectFranchisePlate.isEmpty()){
-                ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
-                responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
-                return responseOrderDTO;
+            // Guardamos la orden en la base de datos y obtenemos la entidad creada
+            Order orderEntity = orderRepository.save(orderMapper.toOrder(order));
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderEntity);
+            List<OrderMenu> orderMenus = new ArrayList<>();
+            for (MenuRequestDTO menuRequestDTO:order.getOrderMenus()) {
+                orderMenus.add(orderMenuRepository.save(new OrderMenu(menuRequestDTO.getQuantity(), orderEntity, menuRepository.findById(menuRequestDTO.getMenuId()).get())));
             }
-            // Lanzamos una excepción si hay platos con franquicia incorrecta
-            throw new Exception(OrderValidations.incorrectPlate(incorrectFranchisePlate));
+            responseOrderDTO.setCliente(customer.get());
+            responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
+            return responseOrderDTO;
         }catch (Exception e){
-            // Lanzamos una excepción si hay platos con franquicia incorrecta
             throw new Exception(e.getMessage());
         }
     }
+
     // Método para obtener todas las órdenes
     public List<ResponseOrderDTO> findAll()throws Exception{
         try {
@@ -145,17 +124,78 @@ public class OrderService {
         try {
             // Buscamos el empleado por su id en la base de datos
             Employee employee = employeeRepository.findByEmployeeId(employeeId);
+
             // Buscamos la orden por su id en la base de datos
             Optional<Order> order = orderRepository.findById(id);
-            if (order.isPresent()) {
-                // Asignamos el empleado a la orden y guardamos los cambios en la base de datos
-                order.get().setEmployeeId(employee);
-                return orderMapper.toOrderDTO(orderRepository.save(order.get()));
-            }
-            // Lanzamos una excepción si no se encuentra la orden
-            else throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
-        } catch (Exception e) {
-            // Capturamos y relanzamos cualquier excepción ocurrida
+
+            // Obtiene la lista de OrderMenu asociada a la orden actual.
+            List<OrderMenu> orderMenus = order.get().getOrderMenus();
+
+            // Mapea la lista de objetos OrderMenu a una lista de objetos ResponseOrderMenuDTO
+            // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
+            List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+
+            // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
+            if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+
+            // Establece el identificador del empleado asociado a la orden actual
+            order.get().setEmployeeId(employee);
+
+            // Establece la lista de OrderMenu asociada a la orden actual.
+            order.get().setOrderMenus(orderMenus);
+
+            // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
+            // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+
+            // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
+            responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+
+            // Retorna el objeto ResponseOrderDTO que contiene los detalles de la orden y la información general de la orden guardada.
+            return responseOrderDTO;
+
+        }catch (Exception e){
+
+            // En caso de que ocurra una excepción durante el proceso, se lanza una nueva excepción con el mensaje de error original.
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public ResponseOrderDTO updateState(Long id)throws Exception {
+        try {
+            // Buscamos la orden por su id en la base de datos
+            Optional<Order> order = orderRepository.findById(id);
+
+            // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
+            if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+
+            // Obtiene la lista de OrderMenu asociada a la orden actual.
+            List<OrderMenu> orderMenus = order.get().getOrderMenus();
+
+            // Mapea la lista de objetos OrderMenu a una lista de objetos ResponseOrderMenuDTO
+            // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
+            List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+
+            // Verifica el estado de orden y si esta igual algun estado de preparacion regresa el estado en el que continua el proceso
+            if (order.get().getStateRequested().equals(OrderStatus.EARRING)) order.get().setStateRequested(OrderStatus.IN_PREPARATION);
+            else if (order.get().getStateRequested().equals(OrderStatus.IN_PREPARATION)) order.get().setStateRequested(OrderStatus.READY);
+            else if (order.get().getStateRequested().equals(OrderStatus.READY)) order.get().setStateRequested(OrderStatus.DELIVERED);
+            else if (order.get().getStateRequested().equals(OrderStatus.DELIVERED)) throw new Exception(OrderResponses.ORDER_DELIVERED.getMessage());
+            else if (order.get().getStateRequested().equals(OrderStatus.CANCELLED)) throw new Exception(OrderResponses.ORDER_CANCELLED.getMessage());
+
+            // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
+            // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+
+            // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
+            responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+
+            // Retorna el objeto ResponseOrderDTO que contiene los detalles de la orden y la información general de la orden guardada.
+            return responseOrderDTO;
+
+        }catch (Exception e){
+
+            // En caso de que ocurra una excepción durante el proceso, se lanza una nueva excepción con el mensaje de error original.
             throw new Exception(e.getMessage());
         }
     }

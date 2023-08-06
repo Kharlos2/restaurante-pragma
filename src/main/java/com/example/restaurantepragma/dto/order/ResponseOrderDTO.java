@@ -1,6 +1,6 @@
-package com.example.restaurantepragma.dto.Order;
+package com.example.restaurantepragma.dto.order;
 
-import com.example.restaurantepragma.dto.OrderMenu.ResponseOrderMenuDTO;
+import com.example.restaurantepragma.dto.orderMenu.ResponseOrderMenuDTO;
 import com.example.restaurantepragma.entities.Customer;
 import com.example.restaurantepragma.enums.OrderStatus;
 

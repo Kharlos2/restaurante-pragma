@@ -1,7 +1,7 @@
 package com.example.restaurantepragma.maps;
 
-import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
-import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.order.OrderRequestDTO;
+import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
 import com.example.restaurantepragma.entities.Order;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;

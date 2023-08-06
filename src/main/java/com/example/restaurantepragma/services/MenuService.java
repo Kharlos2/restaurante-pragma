@@ -1,12 +1,15 @@
 package com.example.restaurantepragma.services;
 
 
-import com.example.restaurantepragma.dto.Menu.MenuStateDTO;
-import com.example.restaurantepragma.dto.Menu.MenuUpdateDTO;
-import com.example.restaurantepragma.dto.Menu.ResponseMenuDTO;
+import com.example.restaurantepragma.dto.menu.MenuStateDTO;
+import com.example.restaurantepragma.dto.menu.MenuUpdateDTO;
+import com.example.restaurantepragma.dto.menu.ResponseMenuDTO;
+import com.example.restaurantepragma.entities.Employee;
 import com.example.restaurantepragma.entities.Menu;
+import com.example.restaurantepragma.enums.EmployeeResponses;
 import com.example.restaurantepragma.enums.MenuResponses;
 import com.example.restaurantepragma.maps.MenuMapper;
+import com.example.restaurantepragma.repository.EmployeeRepository;
 import com.example.restaurantepragma.repository.MenuRepository;
 import com.example.restaurantepragma.validations.GeneralValidations;
 import com.example.restaurantepragma.validations.MenuValidations;
@@ -25,12 +28,20 @@ public class MenuService {
     private MenuRepository menuRepository;
     @Autowired
     private MenuMapper menuMapper;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     // Método para guardar un menú en la base de datos
-    public ResponseMenuDTO save(Menu menu)throws Exception{
+    public ResponseMenuDTO save(Menu menu, Long employeeId, String password)throws Exception{
         try {
+            // Busca el empleado por id
+            Optional<Employee> employee = employeeRepository.findById(employeeId);
+            // valida si el empleado existe
+            if (employee.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
+            // valida la contraseña del usuario
+            else if (!employee.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
             // Validar si todos los campos del menú están completos.
-            if (MenuValidations.fullFields(menu)){
+            else if (MenuValidations.fullFields(menu)){
                 throw new Exception(MenuResponses.EMPTY_FIELDS.getMessage());
             } // Validar si el usuario que intenta crear el menú es un administrador.
             else if (MenuValidations.validationUser(menu.getRole())){
@@ -72,14 +83,20 @@ public class MenuService {
     }
 
     // Método para actualizar un menú existente en la base de datos.
-    public ResponseMenuDTO update(MenuUpdateDTO menu, Long id, Integer user) throws Exception{
+    public ResponseMenuDTO update(MenuUpdateDTO menu, Long id, Long employeeId, String password) throws Exception{
         try {
             Optional<Menu> search = menuRepository.findById(id);
 
-
             if(search.isPresent()){ // Validar si el precio del menú es válido (mayor que cero).
                 Menu menuUpdate = search.get();
-                if (MenuValidations.rightPrice(menu.getPrice())){
+                // Busca el empleado por id
+                Optional<Employee> employee = employeeRepository.findById(employeeId);
+                // valida si el empleado existe
+                if (employee.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
+                    // valida la contraseña del usuario
+                else if (!employee.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
+
+                else if (MenuValidations.rightPrice(menu.getPrice())){
                     throw new Exception(MenuResponses.WRONG_PRICE.getMessage());
 
                 }// Validar si la franquicia del menú es válida.
@@ -90,9 +107,6 @@ public class MenuService {
                 else if (MenuValidations.incorrectString(menu.getDescription())){
                     throw new Exception(MenuResponses.INCORRECT_DESCRIPTION.getMessage());
 
-                }// Validar si el usuario que intenta actualizar el menú es un administrador.
-                else if (MenuValidations.validationUser(user)){
-                    throw new Exception(MenuResponses.NO_ADMIN.getMessage());
                 }
                 // Actualizar los campos del menú con los valores proporcionados.
                 menuUpdate.setPrice(menu.getPrice());
@@ -107,15 +121,18 @@ public class MenuService {
     }
 
     // Método para cambiar el estado de un menú (activar/desactivar) en la base de datos.
-    public MenuStateDTO updateState(Long id, Integer user) throws Exception{
+    public MenuStateDTO updateState(Long id, Long employeeId, String password) throws Exception{
         try{
             Optional<Menu> search = menuRepository.findById(id);
             if (search.isPresent()){
                 Menu update = search.get();
                 // Validar si el usuario que intenta cambiar el estado del menú es un administrador.
-                if (MenuValidations.validationUser(user)){
-                    throw new Exception(MenuResponses.NO_ADMIN.getMessage());
-                }
+                Optional<Employee> employee = employeeRepository.findById(employeeId);
+                // valida si el empleado existe
+                if (employee.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
+                    // valida la contraseña del usuario
+                else if (!employee.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
+
                 // Cambiar el estado del menú a su valor opuesto (activo/inactivo).
                 update.setState(!update.getState());
                 return menuMapper.toMenuState(menuRepository.save(update));

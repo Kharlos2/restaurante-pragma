@@ -1,14 +1,12 @@
 package com.example.restaurantepragma.services;
 
-import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
-import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
-import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
-import com.example.restaurantepragma.dto.OrderMenu.ResponseOrderMenuDTO;
+import com.example.restaurantepragma.dto.menu.MenuRequestDTO;
+import com.example.restaurantepragma.dto.order.CancelOrderRequestDTO;
+import com.example.restaurantepragma.dto.order.OrderRequestDTO;
+import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.orderMenu.ResponseOrderMenuDTO;
 import com.example.restaurantepragma.entities.*;
-import com.example.restaurantepragma.enums.CustomerResponses;
-import com.example.restaurantepragma.enums.MenuResponses;
-import com.example.restaurantepragma.enums.OrderResponses;
-import com.example.restaurantepragma.enums.OrderStatus;
+import com.example.restaurantepragma.enums.*;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.maps.OrderMenuMapper;
 import com.example.restaurantepragma.repository.*;
@@ -120,10 +118,10 @@ public class OrderService {
         }
     }
     // Método para actualizar el empleado asignado a una orden
-    public ResponseOrderDTO updateEmployee(Long id,Long employeeId)throws Exception {
+    public ResponseOrderDTO updateEmployee(Long id,Long employeeId, String password)throws Exception {
         try {
             // Buscamos el empleado por su id en la base de datos
-            Employee employee = employeeRepository.findByEmployeeId(employeeId);
+            Optional<Employee> employee = employeeRepository.findById(employeeId);
 
             // Buscamos la orden por su id en la base de datos
             Optional<Order> order = orderRepository.findById(id);
@@ -135,11 +133,12 @@ public class OrderService {
             // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
             List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
 
+            if (employee.isEmpty()) throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
             // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
             if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
 
             // Establece el identificador del empleado asociado a la orden actual
-            order.get().setEmployeeId(employee);
+            order.get().setEmployeeId(employee.get());
 
             // Establece la lista de OrderMenu asociada a la orden actual.
             order.get().setOrderMenus(orderMenus);
@@ -197,6 +196,24 @@ public class OrderService {
 
             // En caso de que ocurra una excepción durante el proceso, se lanza una nueva excepción con el mensaje de error original.
             throw new Exception(e.getMessage());
+        }
+    }
+    public ResponseOrderDTO cancelOrder (Long orderId, CancelOrderRequestDTO cancelOrderRequestDTO) throws Exception{
+        try {
+            Optional<Order> orderOptional = orderRepository.findById(orderId);
+            if (orderOptional.isEmpty())throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            Order order = orderOptional.get();
+            if (order.getStateRequested()==OrderStatus.CANCELLED) throw new Exception(OrderResponses.ITS_CANCELLED.getMessage());
+            else if (order.getStateRequested()!=OrderStatus.EARRING) throw new Exception(OrderResponses.NO_CANCEL.getMessage());
+            else if (cancelOrderRequestDTO.getCancelMessage().isEmpty()) throw new Exception(OrderResponses.EMPTY_REASON.getMessage());
+            List<OrderMenu> orderMenus = order.getOrderMenus();
+            List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
+            order.setStateRequested(OrderStatus.CANCELLED);
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order));
+            responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+            return responseOrderDTO;
+        }catch (Exception e){
+            throw new Exception((e.getMessage()));
         }
     }
 }

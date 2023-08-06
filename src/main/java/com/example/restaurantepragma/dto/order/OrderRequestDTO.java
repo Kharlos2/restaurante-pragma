@@ -1,6 +1,6 @@
-package com.example.restaurantepragma.dto.Order;
+package com.example.restaurantepragma.dto.order;
 
-import com.example.restaurantepragma.dto.Menu.MenuRequestDTO;
+import com.example.restaurantepragma.dto.menu.MenuRequestDTO;
 import java.util.List;
 
 public class OrderRequestDTO extends OrderDTO{

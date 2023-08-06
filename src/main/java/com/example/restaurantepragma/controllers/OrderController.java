@@ -1,17 +1,10 @@
 package com.example.restaurantepragma.controllers;
 
-import com.example.restaurantepragma.dto.Order.OrderDTO;
-import com.example.restaurantepragma.dto.Order.OrderErrorDTO;
-import com.example.restaurantepragma.dto.Order.OrderRequestDTO;
-import com.example.restaurantepragma.dto.Order.ResponseOrderDTO;
-import com.example.restaurantepragma.dto.employee.EmployeeDTO;
-import com.example.restaurantepragma.entities.Customer;
+import com.example.restaurantepragma.dto.order.*;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.services.OrderService;
-import org.apache.catalina.startup.ExpandWar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,10 +77,10 @@ public class OrderController {
 
     // PUT para actualizar el empleado asignado a una orden
     @PutMapping("/employee/{id}/{employee}")
-    public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long employee) {
+    public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long employee, @RequestParam String password) {
         try {
             // Llama al servicio para actualizar el empleado asignado a la orden y devuelve el resultado con estado HTTP 200 OK
-            return ResponseEntity.ok(orderService.updateEmployee(id, employee));
+            return ResponseEntity.ok(orderService.updateEmployee(id, employee, password));
         } catch (Exception e) {
             // Si ocurre una excepción, devuelve un mensaje de error con estado HTTP 400 BAD_REQUEST
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
@@ -100,6 +93,14 @@ public class OrderController {
             return ResponseEntity.ok(orderService.updateState(id));
         } catch (Exception e) {
             // Si ocurre una excepción, devuelve un mensaje de error con estado HTTP 400 BAD_REQUEST
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
+        }
+    }
+    @PutMapping("/cancel/{orderId}")
+    public ResponseEntity<OrderDTO> cancelOrder (@PathVariable Long orderId, @RequestBody CancelOrderRequestDTO message){
+        try {
+            return ResponseEntity.ok(orderService.cancelOrder(orderId,message));
+        }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }

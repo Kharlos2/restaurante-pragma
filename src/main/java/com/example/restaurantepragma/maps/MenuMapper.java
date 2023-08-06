@@ -1,8 +1,8 @@
 package com.example.restaurantepragma.maps;
 
 
-import com.example.restaurantepragma.dto.Menu.MenuStateDTO;
-import com.example.restaurantepragma.dto.Menu.ResponseMenuDTO;
+import com.example.restaurantepragma.dto.menu.MenuStateDTO;
+import com.example.restaurantepragma.dto.menu.ResponseMenuDTO;
 import com.example.restaurantepragma.entities.Menu;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

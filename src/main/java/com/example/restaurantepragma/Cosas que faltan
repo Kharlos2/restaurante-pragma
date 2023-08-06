@@ -4,6 +4,4 @@ Terminar las validaciones con entidad user cuando sea creada
 
 Modificar correctamente las respuestas http de los controladores
 
-cambiarle el nombre a los paquetes de DTO por minusculas
-
 Verificar el DTO que devuelve el actualizar en menu cuando se cambia el estado

@@ -1,4 +1,4 @@
-package com.example.restaurantepragma.dto.Menu;
+package com.example.restaurantepragma.dto.menu;
 
 public class ResponseMenuDTO extends MenuDTO {
 

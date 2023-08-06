@@ -1,4 +1,4 @@
-package com.example.restaurantepragma.dto.OrderMenu;
+package com.example.restaurantepragma.dto.orderMenu;
 
 import com.example.restaurantepragma.entities.Menu;
 

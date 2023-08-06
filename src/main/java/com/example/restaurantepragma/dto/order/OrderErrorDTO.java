@@ -1,4 +1,4 @@
-package com.example.restaurantepragma.dto.Order;
+package com.example.restaurantepragma.dto.order;
 
 public class OrderErrorDTO extends OrderDTO{
 

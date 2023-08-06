@@ -21,6 +21,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus stateRequested = OrderStatus.EARRING;
 
+    private String orderCode;
     @OneToMany(mappedBy = "orderId")
     @JsonBackReference
     @JsonIgnore
@@ -36,12 +37,13 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, OrderStatus stateRequested, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId) {
+    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, OrderStatus stateRequested, String orderCode, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId) {
         this.id = id;
         this.role = role;
         this.acceptanceRole = acceptanceRole;
         this.franchise = franchise;
         this.stateRequested = stateRequested;
+        this.orderCode = orderCode;
         this.orderMenus = orderMenus;
         this.customerId = customerId;
         this.employeeId = employeeId;
@@ -109,5 +111,13 @@ public class Order {
 
     public void setEmployeeId(Employee employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 }

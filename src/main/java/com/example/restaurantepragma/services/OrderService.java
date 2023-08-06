@@ -118,10 +118,13 @@ public class OrderService {
         }
     }
     // Método para actualizar el empleado asignado a una orden
-    public ResponseOrderDTO updateEmployee(Long id,Long employeeId, String password)throws Exception {
+    public ResponseOrderDTO updateEmployee(Long id,Long assignedEmployeeId, Long employeeUser ,String password)throws Exception {
         try {
+            Optional<Employee> employeeUserOptional = employeeRepository.findById(employeeUser);
+            if (employeeUserOptional.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
+            else if (employeeUserOptional.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
             // Buscamos el empleado por su id en la base de datos
-            Optional<Employee> employee = employeeRepository.findById(employeeId);
+            Optional<Employee> employee = employeeRepository.findById(assignedEmployeeId);
 
             // Buscamos la orden por su id en la base de datos
             Optional<Order> order = orderRepository.findById(id);

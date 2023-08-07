@@ -86,7 +86,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
-    @PutMapping("/employee/{id}")
+    @PutMapping("/employee/state/{id}")
     public ResponseEntity<OrderDTO> uptadeState(@PathVariable Long id) {
         try {
             // Llama al servicio para actualizar el empleado asignado a la orden y devuelve el resultado con estado HTTP 200 OK

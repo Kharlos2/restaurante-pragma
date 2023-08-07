@@ -4,6 +4,7 @@ import com.example.restaurantepragma.dto.menu.MenuRequestDTO;
 import com.example.restaurantepragma.dto.order.CancelOrderRequestDTO;
 import com.example.restaurantepragma.dto.order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.order.ResponseOrderEmployeeDTO;
 import com.example.restaurantepragma.dto.orderMenu.ResponseOrderMenuDTO;
 import com.example.restaurantepragma.entities.*;
 import com.example.restaurantepragma.enums.*;
@@ -38,6 +39,8 @@ public class OrderService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private LogsService logsService;
 
     // Método para guardar una nueva orden
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception{
@@ -47,6 +50,8 @@ public class OrderService {
             //Busco por el id de cliente para asignarlo al orderEntity
             Optional<Customer> customer = customerRepository.findById(order.getCustomerId());
             if (customer.isEmpty()) throw new Exception(CustomerResponses.NOT_FOUNT.getMessage());
+            else if (!customer.get().getStatus()) throw new Exception(CustomerResponses.ACTIVE_ORDER.getMessage());
+            customer.get().setStatus(false);
             // Recorremos cada elemento de la lista de menús que viene en el DTO de la orden
             for(MenuRequestDTO menuRequestDTO : order.getOrderMenus()){
                 // Buscamos el menú correspondiente en la base de datos
@@ -67,6 +72,8 @@ public class OrderService {
             }
             responseOrderDTO.setCliente(customer.get());
             responseOrderDTO.setDetallesOrden(orderMenuMapper.toResponseOrderMenusDTO(orderMenus));
+            logsService.save(orderEntity);
+
             return responseOrderDTO;
         }catch (Exception e){
             throw new Exception(e.getMessage());
@@ -118,11 +125,11 @@ public class OrderService {
         }
     }
     // Método para actualizar el empleado asignado a una orden
-    public ResponseOrderDTO updateEmployee(Long id,Long assignedEmployeeId, Long employeeUser ,String password)throws Exception {
+    public ResponseOrderEmployeeDTO updateEmployee(Long id,Long assignedEmployeeId, Long employeeUser ,String password)throws Exception {
         try {
             Optional<Employee> employeeUserOptional = employeeRepository.findById(employeeUser);
             if (employeeUserOptional.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
-            else if (employeeUserOptional.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
+            else if (!employeeUserOptional.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
             // Buscamos el empleado por su id en la base de datos
             Optional<Employee> employee = employeeRepository.findById(assignedEmployeeId);
 
@@ -145,10 +152,12 @@ public class OrderService {
 
             // Establece la lista de OrderMenu asociada a la orden actual.
             order.get().setOrderMenus(orderMenus);
+            // Asigna a la orden el estado de en preparación
+            order.get().setStateRequested(OrderStatus.IN_PREPARATION);
 
             // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
             // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
-            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+            ResponseOrderEmployeeDTO responseOrderDTO = orderMapper.toOrderEmployeeDTO(orderRepository.save(order.get()));
 
             // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
             responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
@@ -214,6 +223,10 @@ public class OrderService {
             order.setStateRequested(OrderStatus.CANCELLED);
             ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order));
             responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
+            Customer customer = order.getCustomerId();
+            customer.setStatus(true);
+            customerRepository.save(customer);
+            logsService.cancelSave(order);
             return responseOrderDTO;
         }catch (Exception e){
             throw new Exception((e.getMessage()));

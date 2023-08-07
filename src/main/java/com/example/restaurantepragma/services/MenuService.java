@@ -44,9 +44,6 @@ public class MenuService {
             else if (MenuValidations.fullFields(menu)){
                 throw new Exception(MenuResponses.EMPTY_FIELDS.getMessage());
             } // Validar si el usuario que intenta crear el menú es un administrador.
-            else if (MenuValidations.validationUser(menu.getRole())){
-                throw new Exception(MenuResponses.NO_ADMIN.getMessage());
-            }
             // Validar si el precio del menú es válido (mayor que cero).
             else if (MenuValidations.rightPrice(menu.getPrice())){
                 throw new Exception(MenuResponses.WRONG_PRICE.getMessage());

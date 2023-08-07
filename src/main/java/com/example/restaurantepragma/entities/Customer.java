@@ -24,7 +24,6 @@ public class Customer {
     // Anotación para evitar la recursión infinita al serializar la lista de pedidos (orden inverso de serialización)
     @JsonIgnore // Anotación para evitar la serialización de la lista de pedidos (ignora este atributo al serializar)
     private List<Order> orders; // Lista de pedidos realizados por el cliente
-
     public Customer() {
     }
 

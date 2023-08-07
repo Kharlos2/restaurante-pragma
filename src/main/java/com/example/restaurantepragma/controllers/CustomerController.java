@@ -49,4 +49,12 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(customerDTOS);
         }
     }
+    @GetMapping("/logs{id}")
+    public ResponseEntity<CustomerDTO> findLogsById(@PathVariable Long id){
+        try {
+            return ResponseEntity.ok(customerService.findLogsById(id));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomerErrorDTO(e.getMessage()));
+        }
+    }
 }

@@ -1,7 +1,3 @@
-Hacer los usuarios y modificar todo el proyecto par que funcione respecto a eso
-
-Terminar las validaciones con entidad user cuando sea creada
-
 Modificar correctamente las respuestas http de los controladores
 
 Verificar el DTO que devuelve el actualizar en menu cuando se cambia el estado

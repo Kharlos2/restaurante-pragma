@@ -1,6 +1,9 @@
 package com.example.restaurantepragma.controllers;
 
+import com.example.restaurantepragma.dto.customer.CustomerDTO;
 import com.example.restaurantepragma.dto.order.*;
+import com.example.restaurantepragma.entities.Customer;
+import com.example.restaurantepragma.enums.CustomerResponses;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,12 @@ public class OrderController {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
+    }
+    @PostMapping("/send-notification")
+    @ResponseStatus(HttpStatus.CREATED)
+    public String sendNotification(@RequestBody Customer customer) {
+        orderService.sendNotificationToCustomer(customer);
+        return "Notificación enviada al cliente con ID: " + customer.getNameCustomer();
     }
 
     // GET para obtener todas las órdenes

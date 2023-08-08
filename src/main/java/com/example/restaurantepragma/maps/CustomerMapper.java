@@ -1,5 +1,6 @@
 package com.example.restaurantepragma.maps;
 
+import com.example.restaurantepragma.dto.customer.CustomerLogsDTO;
 import com.example.restaurantepragma.dto.customer.ResponseCustomerDTO;
 import com.example.restaurantepragma.entities.Customer;
 import org.mapstruct.Mapper;
@@ -24,5 +25,10 @@ public interface CustomerMapper {
     // Esta función convierte una lista de objetos Customer a una lista de objetos ResponseCustomerDTO
     List<ResponseCustomerDTO> toCustomersDTO(List<Customer> customers);
 
+    @Mappings({
+            @Mapping(source = "nameCustomer", target = "nombre"),
+            @Mapping(source = "orders", target = "ordenes"),
+    })
+    CustomerLogsDTO toCustomerLogsDTO(Customer customer);
 
 }

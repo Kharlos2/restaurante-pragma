@@ -15,8 +15,6 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "menu_id")
     private Long id;
-    @Column(nullable = false)
-    private Integer role;
     @Column(name = "name_menu", nullable = false)
     private String nameMenu;
     @Column(nullable = false)
@@ -44,9 +42,8 @@ public class Menu {
         this.id = id;
     }
 
-    public Menu(Long id, Integer role, String nameMenu, Integer price, String description, String url, String category, Boolean state, String franchise, Double preparationTime) {
+    public Menu(Long id, String nameMenu, Integer price, String description, String url, String category, Boolean state, String franchise, Double preparationTime) {
         this.id = id;
-        this.role = role;
         this.nameMenu = nameMenu;
         this.price = price;
         this.description = description;
@@ -63,14 +60,6 @@ public class Menu {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getRole() {
-        return role;
-    }
-
-    public void setRole(Integer role) {
-        this.role = role;
     }
 
     public String getNameMenu() {

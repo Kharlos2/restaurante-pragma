@@ -4,27 +4,10 @@ import com.example.restaurantepragma.dto.menu.MenuRequestDTO;
 import java.util.List;
 
 public class OrderRequestDTO extends OrderDTO{
-    private Integer role;
-    private Integer acceptanceRole;
+
     private String franchise;
     private Long customerId;
     private List<MenuRequestDTO> orderMenus;
-
-    public Integer getRole() {
-        return role;
-    }
-
-    public void setRole(Integer role) {
-        this.role = role;
-    }
-
-    public Integer getAcceptanceRole() {
-        return acceptanceRole;
-    }
-
-    public void setAcceptanceRole(Integer acceptanceRole) {
-        this.acceptanceRole = acceptanceRole;
-    }
 
     public String getFranchise() {
         return franchise;

@@ -3,6 +3,7 @@ package com.example.restaurantepragma.entities;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -15,13 +16,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long id;
-    private Integer role;
-    private Integer acceptanceRole;
     private String franchise;
     @Enumerated(EnumType.STRING)
     private OrderStatus stateRequested = OrderStatus.EARRING;
-
     private String orderCode;
+
     @OneToMany(mappedBy = "orderId")
     @JsonBackReference
     @JsonIgnore
@@ -34,19 +33,27 @@ public class Order {
     @JsonBackReference
     @JoinColumn(name = "employeeId")
     private Employee employeeId = null;
+    @OneToMany(mappedBy = "orderId")
+    @JsonManagedReference
+    @JsonIgnore
+    private List<Claim> claims;
+    @OneToMany(mappedBy = "orderLogId")
+    @JsonManagedReference
+    @JsonIgnore
+    private List<Logs> logs;
     public Order() {
     }
 
-    public Order(Long id, Integer role, Integer acceptanceRole, String franchise, OrderStatus stateRequested, String orderCode, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId) {
+    public Order(Long id, String franchise, OrderStatus stateRequested, String orderCode, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId, List<Claim> claims, List<Logs> logs) {
         this.id = id;
-        this.role = role;
-        this.acceptanceRole = acceptanceRole;
         this.franchise = franchise;
         this.stateRequested = stateRequested;
         this.orderCode = orderCode;
         this.orderMenus = orderMenus;
         this.customerId = customerId;
         this.employeeId = employeeId;
+        this.claims = claims;
+        this.logs = logs;
     }
 
     public Long getId() {
@@ -55,22 +62,6 @@ public class Order {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getRole() {
-        return role;
-    }
-
-    public void setRole(Integer role) {
-        this.role = role;
-    }
-
-    public Integer getAcceptanceRole() {
-        return acceptanceRole;
-    }
-
-    public void setAcceptanceRole(Integer acceptanceRole) {
-        this.acceptanceRole = acceptanceRole;
     }
 
     public String getFranchise() {
@@ -119,5 +110,21 @@ public class Order {
 
     public void setOrderCode(String orderCode) {
         this.orderCode = orderCode;
+    }
+
+    public List<Logs> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(List<Logs> logs) {
+        this.logs = logs;
+    }
+
+    public List<Claim> getClaimId() {
+        return claims;
+    }
+
+    public void setClaimId(List<Claim> claims) {
+        this.claims = claims;
     }
 }

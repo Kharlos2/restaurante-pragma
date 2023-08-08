@@ -1,7 +1,9 @@
 package com.example.restaurantepragma.maps;
 
+import com.example.restaurantepragma.dto.order.OrderLogsDTO;
 import com.example.restaurantepragma.dto.order.OrderRequestDTO;
 import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
+import com.example.restaurantepragma.dto.order.ResponseOrderEmployeeDTO;
 import com.example.restaurantepragma.entities.Order;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -48,5 +50,21 @@ public interface OrderMapper {
     })
     // Este método convierte un objeto OrderRequestDTO en un objeto Order aplicando las asignaciones definidas.
     Order toOrder (OrderRequestDTO orderRequestDTO);
+
+    @Mappings({
+            @Mapping(source = "franchise", target = "sede"),
+            @Mapping(source = "stateRequested", target = "estadoPededido"),
+            @Mapping(source = "orderMenus", target = "detallesOrden"),
+            @Mapping(source = "customerId", target = "cliente"),
+            @Mapping(source = "employeeId", target = "empleado")
+    })
+    ResponseOrderEmployeeDTO toOrderEmployeeDTO (Order order);
+
+    @Mappings({
+            @Mapping(source = "id",target = "id"),
+            @Mapping(source = "logs",target = "registros")
+    })
+    OrderLogsDTO toOrderLogsDTO (Order order);
+    List<OrderLogsDTO> toOrdersLogsDTO(List<Order> orders);
 
 }

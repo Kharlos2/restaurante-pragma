@@ -5,8 +5,14 @@ import com.example.restaurantepragma.dto.menu.MenuDTO;
 import com.example.restaurantepragma.dto.menu.MenuErrorDTO;
 import com.example.restaurantepragma.dto.menu.MenuUpdateDTO;
 import com.example.restaurantepragma.dto.menu.ResponseMenuDTO;
+import com.example.restaurantepragma.entities.Customer;
 import com.example.restaurantepragma.entities.Menu;
 import com.example.restaurantepragma.services.MenuService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -23,6 +29,15 @@ public class MenuController {
     // Inyección de dependencia del servicio MenuService.
     @Autowired
     private MenuService menuService;
+
+    @Operation(summary = "Guardar un nuevo menu")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Menu guardado exitosamente",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al crear el menu",
+                    content = @Content)
+    })
 
     // Guarda un nuevo menú en la base de datos
     @PostMapping("/")
@@ -41,6 +56,15 @@ public class MenuController {
         }
     }
 
+    @Operation(summary = "Obtener la lista de todos los menus")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Lista de menus obtenida exitosamente",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al obtener la lista de menus",
+                    content = @Content)
+    })
+
     // Método para obtener todos los menús existentes mediante una solicitud GET.
     @GetMapping("/")
     public ResponseEntity<List<MenuDTO>> findAll()throws Exception{
@@ -54,6 +78,15 @@ public class MenuController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(menusDTO);
         }
     }
+
+    @Operation(summary = "Buscar menu por categoria y franquicia")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Busquedad exitosa",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error en la busquedad",
+                    content = @Content)
+    })
 
     // Método para buscar menús por categoría y franquicia mediante una solicitud GET.
     @GetMapping("/category/franchise/")
@@ -78,6 +111,15 @@ public class MenuController {
         }
     }
 
+    @Operation(summary = "Actualizar menu por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Menu actulizado exitosamente",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al actualizar el menu",
+                    content = @Content)
+    })
+
     // Método para actualizar un menú mediante una solicitud PUT utilizando su identificador (id).
     @PutMapping("/{id}")
     public ResponseEntity<MenuDTO> update(@RequestBody MenuUpdateDTO menu, @PathVariable Long id, @RequestParam Long employeeId, @RequestParam String password){
@@ -91,6 +133,15 @@ public class MenuController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MenuErrorDTO(e.getMessage()));
         }
     }
+
+    @Operation(summary = "Actualizar el estado del menu por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Estado actualizado correctamente",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error actualizar el estado ",
+                    content = @Content)
+    })
 
     // Método para actualizar el estado de un menú mediante una solicitud PUT utilizando su identificador (id).
     @PutMapping("/state/{id}")

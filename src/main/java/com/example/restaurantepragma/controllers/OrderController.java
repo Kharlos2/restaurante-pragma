@@ -175,6 +175,16 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
+
+    @Operation(summary = "Obtener ordenes finalizadas")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ordenes obtenidas correctamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error obtener la orden.",
+                    content = @Content)
+    })
+
     @GetMapping("/finishTime")
     public ResponseEntity<List<OrderDTO>> findAllEndTime(){
         try {

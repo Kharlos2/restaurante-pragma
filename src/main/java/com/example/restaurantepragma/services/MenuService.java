@@ -31,7 +31,7 @@ public class MenuService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    // Método para guardar un menú en la base de datos
+    // Método para guardar un menú en la base de datos HISTORIA 1.
     public ResponseMenuDTO save(Menu menu, Long employeeId, String password)throws Exception{
         try {
             // Busca el empleado por id
@@ -79,7 +79,7 @@ public class MenuService {
         }
     }
 
-    // Método para actualizar un menú existente en la base de datos.
+    // Método para actualizar un menú existente en la base de datos. HISTORIA 2
     public ResponseMenuDTO update(MenuUpdateDTO menu, Long id, Long employeeId, String password) throws Exception{
         try {
             Optional<Menu> search = menuRepository.findById(id);

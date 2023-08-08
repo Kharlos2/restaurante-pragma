@@ -61,8 +61,7 @@ public class LogsService {
 
         // Obtener el registro previo en estado 'IN_PREPARATION' para el mismo pedido
         Logs beforeLogs = logsRepositoy.findByOrderLogIdAndStatus(order, OrderStatus.IN_PREPARATION);
-        // ... (mismo proceso de cálculo de duración y actualización de tiempo)
-        // ...
+        // (mismo proceso de cálculo de duración y actualización de tiempo)
 
         // Actualizar el registro previo en el repositorio
         logsRepositoy.save(beforeLogs);
@@ -71,8 +70,7 @@ public class LogsService {
     public void deliveredSave(Order order){
         // Obtener el registro previo en estado 'READY' para el mismo pedido
         Logs beforeLogs = logsRepositoy.findByOrderLogIdAndStatus(order, OrderStatus.READY);
-        // ... (mismo proceso de cálculo de duración y actualización de tiempo)
-        // ...
+        // (mismo proceso de cálculo de duración y actualización de tiempo)
 
         // Obtener el registro inicial en estado 'EARRING' para el mismo pedido
         Logs startLogs = logsRepositoy.findByOrderLogIdAndStatus(order, OrderStatus.EARRING);
@@ -82,8 +80,8 @@ public class LogsService {
         logs.setStartTime(startLogs.getStartTime());
         // Establecer la hora de finalización como el momento actual
         logs.setEndTime(LocalDateTime.now());
-        // ... (mismo proceso de cálculo de duración y actualización de tiempo)
-        // ...
+        //  (mismo proceso de cálculo de duración y actualización de tiempo)
+
         // Guardar el nuevo registro 'logs' en el repositorio
         logsRepositoy.save(logs);
         // Actualizar el registro previo en el repositorio
@@ -93,8 +91,7 @@ public class LogsService {
     public void cancelSave(Order order){
         // Obtener el registro previo en estado 'EARRING' para el mismo pedido
         Logs beforeLogs = logsRepositoy.findByOrderLogIdAndStatus(order, OrderStatus.EARRING);
-        // ... (mismo proceso de cálculo de duración y actualización de tiempo)
-        // ...
+        // (mismo proceso de cálculo de duración y actualización de tiempo)
 
         // Crear un nuevo objeto 'Logs' para el pedido en estado 'CANCELLED'
         Logs logs = new Logs(order, OrderStatus.CANCELLED);

@@ -1,10 +1,10 @@
 package com.example.restaurantepragma.services;
 
-import com.example.restaurantepragma.entities.Customer;
+
 import com.example.restaurantepragma.entities.Logs;
 import com.example.restaurantepragma.entities.Order;
 import com.example.restaurantepragma.enums.OrderStatus;
-import com.example.restaurantepragma.repository.LogsRepositoy;
+import com.example.restaurantepragma.repository.LogsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Service
 public class LogsService {
     @Autowired
-    private LogsRepositoy logsRepositoy;
+    private LogsRepository logsRepositoy;
 
     public void save(Order order){
         Logs logs = new Logs(order,OrderStatus.EARRING);

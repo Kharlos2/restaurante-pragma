@@ -27,7 +27,7 @@ public class ClaimController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ClaimErrorDTO(e.getMessage()));
         }
     }
-    @GetMapping("/findAll/earring")
+    @GetMapping("/findAll/earring/")
     public ResponseEntity<List<ClaimDTO>> findAllEarring(){
         try {
             return ResponseEntity.ok(new ArrayList<>(claimService.findAllEarring()));
@@ -38,7 +38,7 @@ public class ClaimController {
         }
     }
 
-    @PutMapping("/responseClaim")
+    @PutMapping("/responseClaim/")
     public ResponseEntity<ClaimDTO> responseClaim(
             @RequestBody ResponseRequestClaimDTO responseRequestClaimDTO,
             @RequestParam Long idEmpleado,

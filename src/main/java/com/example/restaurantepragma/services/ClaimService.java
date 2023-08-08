@@ -1,6 +1,7 @@
 package com.example.restaurantepragma.services;
 
 import com.example.restaurantepragma.dto.claim.ClaimResquestDTO;
+import com.example.restaurantepragma.dto.claim.ResponseClaimAdminDTO;
 import com.example.restaurantepragma.dto.claim.ResponseClaimDTO;
 import com.example.restaurantepragma.dto.claim.ResponseRequestClaimDTO;
 import com.example.restaurantepragma.entities.Claim;
@@ -40,6 +41,8 @@ public class ClaimService {
         try {
             Optional<Order> orderOptional = orderRepository.findByOrderCode(claimResquestDTO.getCodigoOrden());
             if (orderOptional.isEmpty())throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            else if(claimResquestDTO.getRazon().isEmpty()) throw new Exception(ClaimResponses.EMPTY_REASON.getMessage());
+            else if(claimResquestDTO.getCodigoOrden().isEmpty()) throw new Exception(ClaimResponses.EMPTY_CODE.getMessage());
             Claim claim = new Claim();
             Order order = orderOptional.get();
             claim.setOrderId(order);
@@ -63,24 +66,33 @@ public class ClaimService {
         }
     }
 
-    public ResponseClaimDTO responseClaim(ResponseRequestClaimDTO requestClaim, Long idEmpleado, String password)throws Exception{
+    public ResponseClaimAdminDTO responseClaim(ResponseRequestClaimDTO requestClaim, Long idEmpleado, String password, ClaimStatus respuesta)throws Exception{
         try {
             Optional<Employee> employeeOptional = employeeRepository.findById(idEmpleado);
             if (employeeOptional.isEmpty())throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
             else if (!employeeOptional.get().getPassword().equals(password)) throw new Exception(EmployeeResponses.INCORRECT_PASSWORD.getMessage());
-
             Optional<Claim> claimOptional = claimRepository.findById(requestClaim.getId());
             if (claimOptional.isEmpty()) throw new Exception(ClaimResponses.NOT_FOUNT_CLAIM.getMessage());
             Claim claim = claimOptional.get();
-            if (!claim.getClaimStatus().equals(ClaimStatus.ACCEPTED) && !claim.getClaimStatus().equals(ClaimStatus.REJECTED)){
+            if (respuesta!=ClaimStatus.ACCEPTED && respuesta!=ClaimStatus.REJECTED){
                 throw new Exception(ClaimResponses.NO_STATUS.getMessage());
-            }else if (claim.getResponse().isEmpty()) throw new Exception(ClaimResponses.UNANSWERED.getMessage());
+            }else if (requestClaim.getJustificacion().isEmpty()) throw new Exception(ClaimResponses.UNANSWERED.getMessage());
+            else if (claim.getClaimStatus()!=ClaimStatus.GENERATED) throw new Exception(ClaimResponses.ANSWERED.getMessage());
             claim.setResponse(requestClaim.getJustificacion());
-            claim.setClaimStatus(requestClaim.getRespuesta());
-            return claimMapper.toClaimDTO(claimRepository.save(claim));
+            claim.setClaimStatus(respuesta);
+            return claimMapper.toResponseDTO(claimRepository.save(claim));
         }catch (Exception e){
             throw new Exception(e.getMessage());
         }
     }
+    public ResponseClaimAdminDTO findById(Long id)throws Exception{
+        try {
+            Optional<Claim> claimOptional = claimRepository.findById(id);
+            if (claimOptional.isEmpty()) throw new Exception(ClaimResponses.NOT_FOUNT_CLAIM.getMessage());
+            return claimMapper.toResponseDTO(claimOptional.get());
 
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
 }

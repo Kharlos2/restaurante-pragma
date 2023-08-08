@@ -5,7 +5,6 @@ import com.example.restaurantepragma.enums.ClaimStatus;
 public class ResponseRequestClaimDTO extends ClaimDTO{
 
     private Long id;
-    private ClaimStatus respuesta;
     private String justificacion;
 
     public Long getId() {
@@ -24,11 +23,4 @@ public class ResponseRequestClaimDTO extends ClaimDTO{
         this.justificacion = justificacion;
     }
 
-    public ClaimStatus getRespuesta() {
-        return respuesta;
-    }
-
-    public void setRespuesta(ClaimStatus respuesta) {
-        this.respuesta = respuesta;
-    }
 }

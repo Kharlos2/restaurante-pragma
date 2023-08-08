@@ -6,6 +6,7 @@ import com.example.restaurantepragma.dto.claim.ClaimResquestDTO;
 import com.example.restaurantepragma.dto.claim.ResponseRequestClaimDTO;
 import com.example.restaurantepragma.entities.Customer;
 import com.example.restaurantepragma.repository.ClaimRepository;
+import com.example.restaurantepragma.enums.ClaimStatus;
 import com.example.restaurantepragma.services.ClaimService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -77,13 +78,24 @@ public class ClaimController {
     public ResponseEntity<ClaimDTO> responseClaim(
             @RequestBody ResponseRequestClaimDTO responseRequestClaimDTO,
             @RequestParam Long idEmpleado,
-            @RequestParam String password
+            @RequestParam String password,
+            @RequestParam ClaimStatus respuesta
     ){
         try {
-            return ResponseEntity.ok((claimService.responseClaim(responseRequestClaimDTO,idEmpleado,password)));
+            return ResponseEntity.ok(claimService.responseClaim(responseRequestClaimDTO,idEmpleado,password,respuesta));
 
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ClaimErrorDTO(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ClaimDTO> findById(@PathVariable Long id){
+        try {
+            return ResponseEntity.ok(claimService.findById(id));
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ClaimErrorDTO(e.getMessage()));
+
         }
     }
 }

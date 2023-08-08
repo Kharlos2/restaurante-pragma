@@ -89,6 +89,15 @@ public class ClaimController {
         }
     }
 
+    @Operation(summary = "Obtiene el reclamo por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Exito al obtener el reclamo",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al obtener el reclamo",
+                    content = @Content)
+    })
+
     @GetMapping("/{id}")
     public ResponseEntity<ClaimDTO> findById(@PathVariable Long id){
         try {

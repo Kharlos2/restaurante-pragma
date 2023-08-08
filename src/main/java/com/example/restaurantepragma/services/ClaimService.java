@@ -5,6 +5,7 @@ import com.example.restaurantepragma.dto.claim.ResponseClaimAdminDTO;
 import com.example.restaurantepragma.dto.claim.ResponseClaimDTO;
 import com.example.restaurantepragma.dto.claim.ResponseRequestClaimDTO;
 import com.example.restaurantepragma.entities.Claim;
+import com.example.restaurantepragma.entities.Customer;
 import com.example.restaurantepragma.entities.Employee;
 import com.example.restaurantepragma.entities.Order;
 import com.example.restaurantepragma.enums.ClaimResponses;
@@ -16,6 +17,7 @@ import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.repository.ClaimRepository;
 import com.example.restaurantepragma.repository.EmployeeRepository;
 import com.example.restaurantepragma.repository.OrderRepository;
+import com.example.restaurantepragma.utils.NotificationMananger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -80,6 +82,8 @@ public class ClaimService {
             else if (claim.getClaimStatus()!=ClaimStatus.GENERATED) throw new Exception(ClaimResponses.ANSWERED.getMessage());
             claim.setResponse(requestClaim.getJustificacion());
             claim.setClaimStatus(respuesta);
+            NotificationMananger.sendNotificationToClaims(respuesta, requestClaim.getJustificacion());
+
             return claimMapper.toResponseDTO(claimRepository.save(claim));
         }catch (Exception e){
             throw new Exception(e.getMessage());

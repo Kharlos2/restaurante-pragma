@@ -1,12 +1,21 @@
 package com.example.restaurantepragma.services;
 
+import com.example.restaurantepragma.dto.employee.RankingEmployeeDTO;
 import com.example.restaurantepragma.dto.employee.ResponseEmployeeDTO;
 import com.example.restaurantepragma.entities.Employee;
+import com.example.restaurantepragma.entities.Order;
+import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.maps.EmployeeMapper;
 import com.example.restaurantepragma.repository.EmployeeRepository;
+import com.example.restaurantepragma.repository.LogsRepository;
+import com.example.restaurantepragma.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -20,6 +29,10 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private EmployeeMapper employeeMapper;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private LogsRepository logsRepository;
 
     // Método para guardar un empleado en la base de datos.
     // Recibe un objeto de tipo Employee y retorna un ResponseEmployeeDTO que contiene la información del empleado guardado.
@@ -44,6 +57,34 @@ public class EmployeeService {
         }catch (Exception e){
             // En caso de que ocurra una excepción durante el proceso, lanzamos una nueva excepción con el mensaje de error.
             throw new Exception(e.getMessage());
+        }
+    }
+    public List<RankingEmployeeDTO> findAllAverages()throws Exception{
+        try {
+            List<Employee> employees = employeeRepository.findAll();
+            List<RankingEmployeeDTO> rankingEmployeesDTO = employeeMapper.toRankingEmployeesDTO(employees);
+            for (Employee employee : employees){
+                int quantityOrders = 0;
+                long minutes = 0;
+                List<Order> orders = orderRepository.findAllByEmployeeId(employee);
+                for (Order order: orders){
+                    quantityOrders++;
+                    LocalDateTime startTime = logsRepository.findByOrderLogIdAndStatus(order, OrderStatus.EARRING).getStartTime();
+                    LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.READY).getStartTime();
+                    Duration duration = Duration.between(startTime,endTime);
+                    long time = duration.toMinutes();
+                    minutes += time;
+                }
+                RankingEmployeeDTO employeeDTO = employeeMapper.toRankingEmployeeDTO(employee);
+                if (quantityOrders != 0){
+                    employeeDTO.setPromedio(minutes/quantityOrders);
+                }else employeeDTO.setPromedio(null);
+                rankingEmployeesDTO.add(employeeDTO);
+            }
+            return rankingEmployeesDTO;
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+
         }
     }
 

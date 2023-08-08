@@ -1,9 +1,6 @@
 package com.example.restaurantepragma.maps;
 
-import com.example.restaurantepragma.dto.order.OrderLogsDTO;
-import com.example.restaurantepragma.dto.order.OrderRequestDTO;
-import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
-import com.example.restaurantepragma.dto.order.ResponseOrderEmployeeDTO;
+import com.example.restaurantepragma.dto.order.*;
 import com.example.restaurantepragma.entities.Order;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -66,5 +63,11 @@ public interface OrderMapper {
     })
     OrderLogsDTO toOrderLogsDTO (Order order);
     List<OrderLogsDTO> toOrdersLogsDTO(List<Order> orders);
+
+    @Mappings({
+            @Mapping(source = "orderMenus",target = "detllesOrden")
+    })
+    FinishOrderDTO toFinishDTO(Order order);
+    List<FinishOrderDTO> toFinishsDTO(List<Order> orders);
 
 }

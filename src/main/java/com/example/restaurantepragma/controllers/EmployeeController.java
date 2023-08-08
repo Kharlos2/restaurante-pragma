@@ -67,5 +67,14 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new EmployeeErrorDTO(e.getMessage()));
         }
     }
-
+    @GetMapping("/employeeRanking")
+    public ResponseEntity<List<EmployeeDTO>> findAllAverages()throws Exception{
+        try {
+            return ResponseEntity.ok(new ArrayList<>(employeeService.findAllAverages()));
+        }catch (Exception e){
+            List<EmployeeDTO> employeeDTOS = new ArrayList<>();
+            employeeDTOS.add(new EmployeeErrorDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(employeeDTOS);
+        }
+    }
 }

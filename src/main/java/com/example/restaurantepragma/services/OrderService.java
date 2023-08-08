@@ -1,10 +1,7 @@
 package com.example.restaurantepragma.services;
 
 import com.example.restaurantepragma.dto.menu.MenuRequestDTO;
-import com.example.restaurantepragma.dto.order.CancelOrderRequestDTO;
-import com.example.restaurantepragma.dto.order.OrderRequestDTO;
-import com.example.restaurantepragma.dto.order.ResponseOrderDTO;
-import com.example.restaurantepragma.dto.order.ResponseOrderEmployeeDTO;
+import com.example.restaurantepragma.dto.order.*;
 import com.example.restaurantepragma.dto.orderMenu.ResponseOrderMenuDTO;
 import com.example.restaurantepragma.entities.*;
 import com.example.restaurantepragma.enums.*;
@@ -13,6 +10,7 @@ import com.example.restaurantepragma.maps.OrderMenuMapper;
 import com.example.restaurantepragma.repository.*;
 import com.example.restaurantepragma.utils.NotificationMananger;
 import com.example.restaurantepragma.validations.GeneralValidations;
+import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.swing.plaf.PanelUI;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -40,6 +41,8 @@ public class OrderService {
     private CustomerRepository customerRepository;
     @Autowired
     private LogsService logsService;
+    @Autowired
+    private LogsRepository logsRepository;
 
     // Método para guardar una nueva orden
     public ResponseOrderDTO save(OrderRequestDTO order) throws Exception {
@@ -150,7 +153,8 @@ public class OrderService {
             if (employee.isEmpty()) throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
             // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
             if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
-            else if(order.get().getStateRequested()!=OrderStatus.EARRING) throw new Exception("Esta orden ya tiene un empleado");
+            else if (order.get().getStateRequested() != OrderStatus.EARRING)
+                throw new Exception("Esta orden ya tiene un empleado");
 
             // Establece el identificador del empleado asociado a la orden actual
             order.get().setEmployeeId(employee.get());
@@ -200,13 +204,11 @@ public class OrderService {
                 String orderCode = sendNotificationToCustomer(customer);
                 order.setOrderCode(orderCode);
                 logsService.readySave(order);
-            }
-            else if (order.getStateRequested().equals(OrderStatus.READY)) {
+            } else if (order.getStateRequested().equals(OrderStatus.READY)) {
                 order.setStateRequested(OrderStatus.DELIVERED);
                 logsService.deliveredSave(order);
                 customer.setStatus(true);
-            }
-            else if (order.getStateRequested().equals(OrderStatus.DELIVERED))
+            } else if (order.getStateRequested().equals(OrderStatus.DELIVERED))
                 throw new Exception(OrderResponses.ORDER_DELIVERED.getMessage());
             else if (order.getStateRequested().equals(OrderStatus.CANCELLED))
                 throw new Exception(OrderResponses.ORDER_CANCELLED.getMessage());
@@ -227,7 +229,7 @@ public class OrderService {
         }
     }
 
-    public String generateRandomSms(){
+    public String generateRandomSms() {
         String alphabet = "abcdefghijklmnopqrstvwxyz";
         int length = 5;
 
@@ -243,15 +245,15 @@ public class OrderService {
         return stringBuilder.toString();
     }
 
-   public String sendNotificationToCustomer(Customer Customer){
+    public String sendNotificationToCustomer(Customer Customer) {
         // Generar un codigo aleatorio
-       String randomString = generateRandomSms();
-       // Crear el mensaje de notificación con el UUID aleatorio
-       String message = "¡Su pedido está listo para ser reclamado! Use el siguiente código: " + randomString;
+        String randomString = generateRandomSms();
+        // Crear el mensaje de notificación con el UUID aleatorio
+        String message = "¡Su pedido está listo para ser reclamado! Use el siguiente código: " + randomString;
 
-       // Llamar al método de NotificationManager para enviar la notificación
-       NotificationMananger.sendNotificationToCustomer(Customer.getNameCustomer(), message);
-       return randomString;
+        // Llamar al método de NotificationManager para enviar la notificación
+        NotificationMananger.sendNotificationToCustomer(Customer.getNameCustomer(), message);
+        return randomString;
     }
 
     public ResponseOrderDTO cancelOrder(Long orderId, CancelOrderRequestDTO cancelOrderRequestDTO) throws Exception {
@@ -311,4 +313,28 @@ public class OrderService {
         }
 
     }
+
+    public List<FinishOrderDTO> findAllEndTime() throws Exception{
+        try {
+            List<Order> orders = orderRepository.findAll();
+            List<FinishOrderDTO> orderDTOS = new ArrayList<>();
+
+            for(Order order : orders){
+
+                LocalDateTime startTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.EARRING).getStartTime();
+                LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.READY).getStartTime();
+
+                Duration duration = Duration.between(startTime,endTime);
+                Long time = duration.toMinutes();
+                FinishOrderDTO finishOrderDTO = orderMapper.toFinishDTO(order);
+                finishOrderDTO.setTiempo(time);
+                orderDTOS.add(finishOrderDTO);
+            }
+            return orderDTOS;
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+
+        }
+    }
+
 }

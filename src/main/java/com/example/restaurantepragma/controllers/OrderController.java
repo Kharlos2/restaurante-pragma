@@ -175,4 +175,14 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
+    @GetMapping("/finishTime")
+    public ResponseEntity<List<OrderDTO>> findAllEndTime(){
+        try {
+            return ResponseEntity.ok(new ArrayList<>(orderService.findAllEndTime()));
+        }catch (Exception e){
+            List<OrderDTO> orderDTOList = new ArrayList<>();
+            orderDTOList.add(new OrderErrorDTO(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
+        }
+    }
 }

@@ -1,9 +1,11 @@
 package com.example.restaurantepragma.maps;
 
+import com.example.restaurantepragma.dto.employee.RankingEmployeeDTO;
 import com.example.restaurantepragma.dto.employee.ResponseEmployeeDTO;
 import com.example.restaurantepragma.entities.Employee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 import java.util.List;
 
@@ -24,5 +26,13 @@ public interface EmployeeMapper {
 
     // Método que convierte una lista de objetos Employee a una lista de objetos ResponseEmployeeDTO
     List<ResponseEmployeeDTO> toEmployeesDTO(List<Employee> employees);
+
+    @Mappings({
+            @Mapping(source = "employeeId",target = "id"),
+            @Mapping(source = "nameEmployee",target = "nombre"),
+            @Mapping(target = "promedio",ignore = true)
+    })
+    RankingEmployeeDTO toRankingEmployeeDTO(Employee employee);
+    List<RankingEmployeeDTO> toRankingEmployeesDTO(List<Employee> employees);
 
 }

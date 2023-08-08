@@ -10,9 +10,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
     Page<Order> findByStateRequestedAndFranchise(OrderStatus stateRequested, String franchise, Pageable pageable);
-     List<Order> findAllByCustomerId(Customer customer);
+    List<Order> findAllByCustomerId(Customer customer);
+    Optional<Order> findByOrderCode(String orderCode);
+
 }

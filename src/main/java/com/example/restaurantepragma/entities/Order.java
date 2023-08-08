@@ -20,6 +20,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus stateRequested = OrderStatus.EARRING;
     private String orderCode;
+
     @OneToMany(mappedBy = "orderId")
     @JsonBackReference
     @JsonIgnore
@@ -32,6 +33,10 @@ public class Order {
     @JsonBackReference
     @JoinColumn(name = "employeeId")
     private Employee employeeId = null;
+    @OneToMany(mappedBy = "orderId")
+    @JsonManagedReference
+    @JsonIgnore
+    private List<Claim> claims;
     @OneToMany(mappedBy = "orderLogId")
     @JsonManagedReference
     @JsonIgnore
@@ -39,7 +44,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(Long id, String franchise, OrderStatus stateRequested, String orderCode, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId, List<Logs> logs) {
+    public Order(Long id, String franchise, OrderStatus stateRequested, String orderCode, List<OrderMenu> orderMenus, Customer customerId, Employee employeeId, List<Claim> claims, List<Logs> logs) {
         this.id = id;
         this.franchise = franchise;
         this.stateRequested = stateRequested;
@@ -47,6 +52,7 @@ public class Order {
         this.orderMenus = orderMenus;
         this.customerId = customerId;
         this.employeeId = employeeId;
+        this.claims = claims;
         this.logs = logs;
     }
 
@@ -112,5 +118,13 @@ public class Order {
 
     public void setLogs(List<Logs> logs) {
         this.logs = logs;
+    }
+
+    public List<Claim> getClaimId() {
+        return claims;
+    }
+
+    public void setClaimId(List<Claim> claims) {
+        this.claims = claims;
     }
 }

@@ -149,6 +149,7 @@ public class OrderService {
             if (employee.isEmpty()) throw new Exception(EmployeeResponses.NOT_FOUNT_EMPLOYEE.getMessage());
             // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
             if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            else if(order.get().getStateRequested()!=OrderStatus.EARRING) throw new Exception("Esta orden ya tiene un empleado");
 
             // Establece el identificador del empleado asociado a la orden actual
             order.get().setEmployeeId(employee.get());
@@ -157,6 +158,7 @@ public class OrderService {
             order.get().setOrderMenus(orderMenus);
             // Asigna a la orden el estado de en preparación
             order.get().setStateRequested(OrderStatus.IN_PREPARATION);
+            logsService.inPreparationSave(order.get());
 
             // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
             // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
@@ -178,39 +180,38 @@ public class OrderService {
     public ResponseOrderDTO updateState(Long id) throws Exception {
         try {
             // Buscamos la orden por su id en la base de datos
-            Optional<Order> order = orderRepository.findById(id);
-
+            Optional<Order> orderOptional = orderRepository.findById(id);
             // Verifica si la orden no existe (si está vacía). Si es así, lanza una excepción con un mensaje específico.
-            if (order.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
-
-            Customer customer = order.get().getCustomerId();
+            if (orderOptional.isEmpty()) throw new Exception(OrderResponses.NOT_FOUNT_ORDER.getMessage());
+            Order order = orderOptional.get();
+            Customer customer = order.getCustomerId();
 
             // Obtiene la lista de OrderMenu asociada a la orden actual.
-            List<OrderMenu> orderMenus = order.get().getOrderMenus();
+            List<OrderMenu> orderMenus = order.getOrderMenus();
 
             // Mapea la lista de objetos OrderMenu a una lista de objetos ResponseOrderMenuDTO
             // utilizando el mapeador "orderMenuMapper" definido previamente en el código.
             List<ResponseOrderMenuDTO> responseOrderMenuDTOS = orderMenuMapper.toResponseOrderMenusDTO(orderMenus);
 
             // Verifica el estado de orden y si esta igual algun estado de preparacion regresa el estado en el que continua el proceso
-            if (order.get().getStateRequested().equals(OrderStatus.EARRING))
-                order.get().setStateRequested(OrderStatus.IN_PREPARATION);
-            else if (order.get().getStateRequested().equals(OrderStatus.IN_PREPARATION)) {
-                order.get().setStateRequested(OrderStatus.READY);
-
-                //
-                sendNotificationToCustomer(customer);
+            if (order.getStateRequested().equals(OrderStatus.IN_PREPARATION)) {
+                order.setStateRequested(OrderStatus.READY);
+                String orderCode = sendNotificationToCustomer(customer);
+                order.setOrderCode(orderCode);
+                logsService.readySave(order);
             }
-            else if (order.get().getStateRequested().equals(OrderStatus.READY))
-                order.get().setStateRequested(OrderStatus.DELIVERED);
-            else if (order.get().getStateRequested().equals(OrderStatus.DELIVERED))
+            else if (order.getStateRequested().equals(OrderStatus.READY)) {
+                order.setStateRequested(OrderStatus.DELIVERED);
+                logsService.deliveredSave(order);
+                customer.setStatus(true);
+            }
+            else if (order.getStateRequested().equals(OrderStatus.DELIVERED))
                 throw new Exception(OrderResponses.ORDER_DELIVERED.getMessage());
-            else if (order.get().getStateRequested().equals(OrderStatus.CANCELLED))
+            else if (order.getStateRequested().equals(OrderStatus.CANCELLED))
                 throw new Exception(OrderResponses.ORDER_CANCELLED.getMessage());
-
             // Guarda la orden actualizada en la base de datos utilizando el repositorio "orderRepository".
             // La orden es guardada o actualizada en la base de datos, y el resultado es mapeado a un objeto ResponseOrderDTO.
-            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order.get()));
+            ResponseOrderDTO responseOrderDTO = orderMapper.toOrderDTO(orderRepository.save(order));
 
             // Establece la lista de detalles de orden (ResponseOrderMenuDTO) en el objeto ResponseOrderDTO.
             responseOrderDTO.setDetallesOrden(responseOrderMenuDTOS);
@@ -225,10 +226,9 @@ public class OrderService {
         }
     }
 
-    private static final String alphabet = "abcdefghijklmnopqrstvwxyz";
-    private static final int length = 5;
-
     public String generateRandomSms(){
+        String alphabet = "abcdefghijklmnopqrstvwxyz";
+        int length = 5;
 
         Random random = new Random();
         StringBuilder stringBuilder = new StringBuilder();
@@ -242,20 +242,15 @@ public class OrderService {
         return stringBuilder.toString();
     }
 
-   public void sendNotificationToCustomer(Customer Customer) {
+   public String sendNotificationToCustomer(Customer Customer){
+        // Generar un codigo aleatorio
+       String randomString = generateRandomSms();
+       // Crear el mensaje de notificación con el UUID aleatorio
+       String message = "¡Su pedido está listo para ser reclamado! Use el siguiente código: " + randomString;
 
-        try {
-            // Generar un codigo aleatorio
-            String randomString = generateRandomSms();
-
-            // Crear el mensaje de notificación con el UUID aleatorio
-            String message = "¡Su pedido está listo para ser reclamado! Use el siguiente código: " + randomString;
-
-            // Llamar al método de NotificationManager para enviar la notificación
-            NotificationMananger.sendNotificationToCustomer(Customer.getNameCustomer(), message);
-        } catch (Exception e) {
-
-        }
+       // Llamar al método de NotificationManager para enviar la notificación
+       NotificationMananger.sendNotificationToCustomer(Customer.getNameCustomer(), message);
+       return randomString;
     }
 
     public ResponseOrderDTO cancelOrder(Long orderId, CancelOrderRequestDTO cancelOrderRequestDTO) throws Exception {

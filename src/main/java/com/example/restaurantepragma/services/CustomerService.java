@@ -12,9 +12,8 @@ import com.example.restaurantepragma.maps.CustomerMapper;
 import com.example.restaurantepragma.maps.LogsMapper;
 import com.example.restaurantepragma.maps.OrderMapper;
 import com.example.restaurantepragma.repository.CustomerRepository;
-import com.example.restaurantepragma.repository.LogsRepositoy;
+import com.example.restaurantepragma.repository.LogsRepository;
 import com.example.restaurantepragma.repository.OrderRepository;
-import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +36,8 @@ public class CustomerService {
     @Autowired
     private LogsMapper logsMapper;
     @Autowired
-    private LogsRepositoy logsRepositoy;
+    private LogsRepository logsRepository;
+    @Autowired
     private OrderRepository orderRepository;
 
     // Método para guardar un objeto Customer en la base de datos
@@ -70,12 +70,13 @@ public class CustomerService {
 
             Customer customer = customerOptional.get();
             List<Order> orders = customer.getOrders();
-            List<Logs> logs = logsRepositoy.findAll();
 
             List<OrderLogsDTO> orderLogsDTOs = new ArrayList<>();
             for (Order order : orders) {
                 OrderLogsDTO orderLogsDTO = new OrderLogsDTO();
                 orderLogsDTO.setId(order.getId()); // Establecer el ID de la orden
+
+                List<Logs> logs = logsRepository.findByOrderLogId(order);
 
                 List<ResponseLogsDTO> responseLogsDTOs = new ArrayList<>();
                 for (Logs log : logs) {

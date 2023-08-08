@@ -6,6 +6,11 @@ import com.example.restaurantepragma.entities.Customer;
 import com.example.restaurantepragma.enums.CustomerResponses;
 import com.example.restaurantepragma.enums.OrderStatus;
 import com.example.restaurantepragma.services.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -24,6 +29,15 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Operation(summary = "Crear una nueva orden.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Orden creada correctamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error crear la orden.",
+                    content = @Content)
+    })
+
     // POST para crear una nueva orden
     @PostMapping("/")
     public ResponseEntity<OrderDTO> save(@RequestBody OrderRequestDTO order) throws Exception {
@@ -37,12 +51,22 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
+
     @PostMapping("/send-notification")
     @ResponseStatus(HttpStatus.CREATED)
     public String sendNotification(@RequestBody Customer customer) {
         orderService.sendNotificationToCustomer(customer);
         return "Notificación enviada al cliente con ID: " + customer.getNameCustomer();
     }
+
+    @Operation(summary = "Obtener lista de todas las ordenes.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al obtener la lista.",
+                    content = @Content)
+    })
 
     // GET para obtener todas las órdenes
     @GetMapping("/")
@@ -59,6 +83,15 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(orderDTOList);
         }
     }
+
+    @Operation(summary = "Obtener lista de ordenes por estado y franquicia.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista obtenida exitosamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al obtener la lista.",
+                    content = @Content)
+    })
 
     // GET para obtener órdenes por estado y franquicia
     @GetMapping("/state/franchise/")
@@ -84,6 +117,15 @@ public class OrderController {
         }
     }
 
+    @Operation(summary = "Actualizar el empleado asignado a una orden.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Empleado actulizado exitosamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al actualizar al empleado.",
+                    content = @Content)
+    })
+
     // PUT para actualizar el empleado asignado a una orden
     @PutMapping("/employee/{id}/{employee}")
     public ResponseEntity<OrderDTO> uptadeEmployee(@PathVariable Long id, @RequestParam Long assignedEmployeeId ,@RequestParam Long employeeUser, @RequestParam String password) {
@@ -95,6 +137,16 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
+
+    @Operation(summary = "Actualizar el estado de una orden por su ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Orden actualizada exitosamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al actualizar la orden.",
+                    content = @Content)
+    })
+
     @PutMapping("/employee/state/{id}")
     public ResponseEntity<OrderDTO> uptadeState(@PathVariable Long id) {
         try {
@@ -105,6 +157,16 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new OrderErrorDTO(e.getMessage()));
         }
     }
+
+    @Operation(summary = "Cancelar una orden")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Orden cancelada exitosamente.",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error cancelar la orden.",
+                    content = @Content)
+    })
+
     @PutMapping("/cancel/{orderId}")
     public ResponseEntity<OrderDTO> cancelOrder (@PathVariable Long orderId, @RequestBody CancelOrderRequestDTO message){
         try {

@@ -67,7 +67,17 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new EmployeeErrorDTO(e.getMessage()));
         }
     }
-    @GetMapping("/employeeRanking")
+
+    @Operation(summary = "Obtener ranking empleados")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ranking obtenido exitosamente",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Customer.class)) }),
+            @ApiResponse(responseCode = "400", description = "Error al obtener el ranking",
+                    content = @Content)
+    })
+
+    @GetMapping("/Ranking")
     public ResponseEntity<List<EmployeeDTO>> findAllAverages()throws Exception{
         try {
             return ResponseEntity.ok(new ArrayList<>(employeeService.findAllAverages()));

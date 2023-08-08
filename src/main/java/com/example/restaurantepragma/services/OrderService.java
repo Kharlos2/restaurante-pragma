@@ -316,24 +316,36 @@ public class OrderService {
 
     public List<FinishOrderDTO> findAllEndTime() throws Exception{
         try {
+            // Obtener una lista de todas las órdenes desde el repositorio de órdenes
             List<Order> orders = orderRepository.findAll();
+            // Crear una lista para almacenar los objetos FinishOrderDTO resultantes
             List<FinishOrderDTO> orderDTOS = new ArrayList<>();
 
-            for(Order order : orders){
+            // Iterar a través de cada orden en la lista de órdenes
+            for (Order order : orders) {
+                // Obtener la hora de inicio registrada en los registros para el estado "EARRING"
+                LocalDateTime startTime = logsRepository.findByOrderLogIdAndStatus(order, OrderStatus.EARRING).getStartTime();
+                // Obtener la hora de inicio registrada en los registros para el estado "READY"
+                LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order, OrderStatus.READY).getStartTime();
 
-                LocalDateTime startTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.EARRING).getStartTime();
-                LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.READY).getStartTime();
-
-                Duration duration = Duration.between(startTime,endTime);
+                // Calcular la duración entre la hora de inicio y la hora de finalización
+                Duration duration = Duration.between(startTime, endTime);
+                // Convertir la duración a minutos
                 Long time = duration.toMinutes();
+
+                // Convertir la orden a un objeto FinishOrderDTO utilizando un mapeador
                 FinishOrderDTO finishOrderDTO = orderMapper.toFinishDTO(order);
+                // Establecer el tiempo de duración en el objeto FinishOrderDTO
                 finishOrderDTO.setTiempo(time);
+                // Agregar el objeto FinishOrderDTO a la lista resultante
                 orderDTOS.add(finishOrderDTO);
             }
-            return orderDTOS;
-        }catch (Exception e){
-            throw new Exception(e.getMessage());
 
+            // Devolver la lista de objetos FinishOrderDTO con la información calculada
+            return orderDTOS;
+        } catch (Exception e) {
+            // Capturar cualquier excepción que ocurra y relanzarla con un mensaje
+            throw new Exception(e.getMessage());
         }
     }
 

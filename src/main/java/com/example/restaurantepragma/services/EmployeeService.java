@@ -61,30 +61,53 @@ public class EmployeeService {
     }
     public List<RankingEmployeeDTO> findAllAverages()throws Exception{
         try {
+            // Obtener la lista de todos los empleados desde el repositorio
             List<Employee> employees = employeeRepository.findAll();
+
+            // Crear una lista para almacenar los datos de ranking de empleados
             List<RankingEmployeeDTO> rankingEmployeesDTO = employeeMapper.toRankingEmployeesDTO(employees);
-            for (Employee employee : employees){
-                int quantityOrders = 0;
-                long minutes = 0;
+
+            // Iterar a través de cada empleado
+            for (Employee employee : employees) {
+                int quantityOrders = 0; // Contador de órdenes procesadas por el empleado
+                long minutes = 0; // Acumulador de minutos totales para calcular el promedio
+
+                // Obtener todas las órdenes asociadas a este empleado desde el repositorio de órdenes
                 List<Order> orders = orderRepository.findAllByEmployeeId(employee);
-                for (Order order: orders){
-                    quantityOrders++;
+
+                // Iterar a través de cada orden del empleado
+                for (Order order : orders) {
+                    quantityOrders++; // Incrementar el contador de órdenes
+
+                    // Obtener la marca de tiempo de inicio y finalización de la orden desde el repositorio de registros
                     LocalDateTime startTime = logsRepository.findByOrderLogIdAndStatus(order, OrderStatus.EARRING).getStartTime();
-                    LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order,OrderStatus.READY).getStartTime();
-                    Duration duration = Duration.between(startTime,endTime);
+                    LocalDateTime endTime = logsRepository.findByOrderLogIdAndStatus(order, OrderStatus.READY).getStartTime();
+
+                    // Calcular la duración de la orden en minutos
+                    Duration duration = Duration.between(startTime, endTime);
                     long time = duration.toMinutes();
-                    minutes += time;
+                    minutes += time; // Acumular el tiempo total en minutos
                 }
+
+                // Convertir el empleado en DTO de ranking
                 RankingEmployeeDTO employeeDTO = employeeMapper.toRankingEmployeeDTO(employee);
-                if (quantityOrders != 0){
-                    employeeDTO.setPromedio(minutes/quantityOrders);
-                }else employeeDTO.setPromedio(null);
+
+                // Calcular el promedio de tiempo si hay órdenes, de lo contrario, establecerlo como nulo
+                if (quantityOrders != 0) {
+                    employeeDTO.setPromedio(minutes / quantityOrders);
+                } else {
+                    employeeDTO.setPromedio(null);
+                }
+
+                // Agregar el DTO de empleado al ranking
                 rankingEmployeesDTO.add(employeeDTO);
             }
-            return rankingEmployeesDTO;
-        }catch (Exception e){
-            throw new Exception(e.getMessage());
 
+            // Devolver la lista de DTOs de empleados para el ranking
+            return rankingEmployeesDTO;
+        } catch (Exception e) {
+            // Capturar cualquier excepción y relanzarla como una excepción controlada
+            throw new Exception(e.getMessage());
         }
     }
 
